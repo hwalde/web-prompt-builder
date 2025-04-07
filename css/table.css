@@ -16,8 +16,8 @@
 #records-table thead th {
     background-color: var(--light-color);
     font-weight: bold;
-    position: sticky; /* Hält den Header beim Scrollen fest, wenn die Tabelle groß wird */
-    top: 0; /* Erfordert evtl. Anpassung basierend auf der Höhe anderer fixer Elemente */
+    position: sticky;
+    top: 0;
     z-index: 10;
 }
 
@@ -25,23 +25,23 @@
     transition: background-color 0.15s ease;
 }
 
-#records-table tbody tr:nth-child(odd) {
-   /* background-color: #fdfdfd; Optional: Zebra-Streifen */
-}
-
 #records-table tbody tr:hover {
-    background-color: rgba(0, 123, 255, 0.05); /* Leichter Hover-Effekt */
+    background-color: rgba(0, 123, 255, 0.05);
 }
 
 #records-table .col-select { width: 80px; text-align: center; }
-#records-table .col-name { /* Nimmt den Rest der Breite */ }
+#records-table .col-name { /* No specific width, takes remaining space */ }
 #records-table .col-actions { width: 200px; text-align: center; }
+#records-table .col-drag { 
+    width: 50px; 
+    text-align: center; 
+}
 
 #records-table input[type="checkbox"] {
-    width: auto; /* Checkbox nicht auf volle Breite */
-    margin: 0 auto; /* Zentrieren in der Zelle */
-    display: block; /* Für Zentrierung */
-    transform: scale(1.2); /* Etwas größer machen */
+    width: auto;
+    margin: 0 auto;
+    display: block;
+    transform: scale(1.2);
     cursor: pointer;
 }
 
@@ -54,31 +54,62 @@
 #records-table .action-buttons button {
     padding: 0.4em 0.8em;
     font-size: 0.9rem;
-    margin: 0; /* Remove margin to avoid extra spacing */
+    margin: 0;
 }
 
-/* Drag & Drop Styling */
-#records-tbody tr {
-    cursor: grab; /* Zeigt an, dass die Zeile greifbar ist */
+/* Default state for table rows (that are actual records) */
+#records-tbody tr[data-id] {
+    cursor: default;
+    touch-action: auto; /* Allow default touch actions on the row */
 }
 
+/* Styles for the row being actively dragged */
 #records-tbody tr.dragging {
-    opacity: 0.5;
-    background-color: var(--warning-color); /* Hervorheben der gezogenen Zeile */
-    cursor: grabbing; /* Cursor während des Ziehens */
-    display: table; /* Verhindert, dass die Spaltenbreiten kollabieren */
+    opacity: 0.9;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    background-color: var(--warning-color);
+    color: var(--dark-color);
+}
+
+/* Ensure cells within the dragging row also get the background */
+#records-tbody tr.dragging td {
+    background-color: var(--warning-color);
+}
+
+.drag-handle {
+    cursor: grab;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 100%;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    height: 100%;
+    color: var(--secondary-color);
+    transition: color 0.2s ease;
 }
 
-/* Optional: Visuelles Feedback, wo das Element abgelegt werden kann */
-#records-tbody tr.drag-over {
-    /*border-top: 2px dashed var(--primary-color); */
-    background-color: rgba(0, 123, 255, 0.1);
+.drag-handle:hover {
+    color: var(--primary-color);
 }
 
-/* Verhindern, dass Buttons das Dragging stören */
+.drag-handle svg {
+    pointer-events: none; /* Ensures the SVG doesn't interfere with drag events */
+}
+
+/* Prevent dragging on interactive elements */
 #records-table button,
 #records-table input {
-    cursor: initial; /* Normaler Cursor für interaktive Elemente in der Zeile */
+    cursor: pointer;
+    touch-action: auto;
+}
+
+/* Update cursor for handle while dragging */
+.drag-handle:active,
+#records-tbody tr.dragging .drag-handle {
+    cursor: grabbing;
+}
+
+/* Global grabbing cursor while dragging */
+body.is-dragging,
+body.is-dragging * {
+    cursor: grabbing !important; /* Force grabbing cursor everywhere */
 }

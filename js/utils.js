@@ -12,6 +12,21 @@ function generateUUID() {
 }
 
 /**
+ * Escaped HTML-Inhalt (ersetzt spezielle Zeichen).
+ * @param {string} content Der zu escapende Inhalt.
+ * @returns {string} Der escapte Inhalt.
+ */
+function escapeHtml(content) {
+    if (content === null || content === undefined) return '';
+    return String(content)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+/**
  * Escaped XML-Namen (vereinfacht). Entfernt ungültige Zeichen und stellt sicher,
  * dass der Name mit einem Buchstaben oder '_' beginnt.
  * Ersetzt Leerzeichen und andere ungültige Zeichen durch '_'.
@@ -107,6 +122,7 @@ function showCheckAnimation(buttonElement) {
 // Machen wir die Funktionen global verfügbar (oder über Module exportieren, wenn gewünscht)
 window.Utils = {
     generateUUID,
+    escapeHtml,
     escapeXmlName,
     escapeXmlContent,
     debounce,

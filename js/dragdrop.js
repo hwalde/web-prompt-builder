@@ -1,113 +1,245 @@
 const DragDrop = (() => {
     let draggedItem = null;
-    let recordsTbody = null;
+    let recordsContainer = null;
     let onDropCallback = null;
+    let isDragging = false;
+    let touchStartY = 0;
+    let lastHoveredRow = null; // Track the last row hovered over
+    let lastTouchY = 0;
+    let initialized = false;
+    let scrollInterval = null; // For auto-scrolling
+    const scrollSensitivity = 40; // Pixels from edge to trigger scroll
+    const scrollSpeed = 10; // Pixels to scroll per interval
 
     function init(tbodyElement, dropCallback) {
-        recordsTbody = tbodyElement;
+        if (initialized) {
+            cleanup();
+        }
+        
+        recordsContainer = tbodyElement;
         onDropCallback = dropCallback;
+        initialized = true;
 
-        if (!recordsTbody) {
-            console.error("Tbody element not found for Drag & Drop initialization.");
+        if (!recordsContainer) {
+            console.error("Container element not found for Drag & Drop initialization.");
             return;
         }
 
-        // Use event delegation on the tbody
-        recordsTbody.addEventListener('dragstart', handleDragStart);
-        recordsTbody.addEventListener('dragover', handleDragOver);
-        recordsTbody.addEventListener('dragleave', handleDragLeave);
-        recordsTbody.addEventListener('drop', handleDrop);
-        recordsTbody.addEventListener('dragend', handleDragEnd);
+        setupRows();
+        
+        // Global listeners for move and end events
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
+        document.addEventListener('mouseup', handleDragEnd);
+        document.addEventListener('touchend', handleDragEnd);
+    }
+    
+    function cleanup() {
+        // Reset state
+        draggedItem?.classList.remove('dragging'); // Ensure class is removed
+        draggedItem = null;
+        isDragging = false;
+        lastHoveredRow = null;
+        stopAutoScroll();
+        
+        // Remove global listeners
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('touchmove', handleTouchMove);
+        document.removeEventListener('mouseup', handleDragEnd);
+        document.removeEventListener('touchend', handleDragEnd);
+        
+        // Remove row listeners
+        if (recordsContainer) {
+            const rows = recordsContainer.querySelectorAll('tr[data-id]');
+            rows.forEach(row => {
+                row.removeEventListener('mousedown', handleDragStart);
+                row.removeEventListener('touchstart', handleTouchStart);
+            });
+        }
+        initialized = false;
+    }
+    
+    function setupRows() {
+        if (!recordsContainer) return;
+        
+        const rows = recordsContainer.querySelectorAll('tr[data-id]');
+        rows.forEach(row => {
+            // Ensure listeners aren't added multiple times
+            row.removeEventListener('mousedown', handleDragStart);
+            row.removeEventListener('touchstart', handleTouchStart);
+            
+            row.addEventListener('mousedown', handleDragStart);
+            row.addEventListener('touchstart', handleTouchStart, { passive: false });
+            row.draggable = true; // Keep for semantics, though we prevent default DND
+        });
+    }
+
+    function performSwap(targetRow) {
+        if (!draggedItem || !targetRow || draggedItem === targetRow) return;
+
+        const currentRect = draggedItem.getBoundingClientRect();
+        const targetRect = targetRow.getBoundingClientRect();
+        const parent = recordsContainer;
+
+        // Determine if dragging down or up
+        const draggingDown = currentRect.top < targetRect.top;
+
+        if (draggingDown) {
+            // Insert dragged item after the target item
+            parent.insertBefore(draggedItem, targetRow.nextSibling);
+        } else {
+            // Insert dragged item before the target item
+            parent.insertBefore(draggedItem, targetRow);
+        }
+        lastHoveredRow = targetRow; // Update last hovered row after swap
     }
 
     function handleDragStart(e) {
-        // Allow dragging only when clicking directly on the row, not buttons/checkboxes
-         if (e.target.tagName === 'TR') {
-             draggedItem = e.target;
-             e.dataTransfer.effectAllowed = 'move';
-             e.dataTransfer.setData('text/plain', draggedItem.dataset.id); // Pass the record ID
-
-             // Add delay so the browser can render the ghost image before styling
-             setTimeout(() => {
-                 if (draggedItem) draggedItem.classList.add('dragging');
-             }, 0);
-         } else {
-             // Prevent dragging if started on an interactive element within the row
-             e.preventDefault();
+        const dragHandle = e.target.closest('.drag-handle');
+        if (!dragHandle || isDragging) return;
+        
+        draggedItem = e.target.closest('tr');
+        if (!draggedItem || !draggedItem.dataset.id) {
+            draggedItem = null;
+            return;
         }
-    }
-
-    function handleDragOver(e) {
-        e.preventDefault(); // Necessary to allow dropping
-        e.dataTransfer.dropEffect = 'move';
-
-        const targetRow = e.target.closest('tr');
-        if (targetRow && targetRow !== draggedItem && recordsTbody.contains(targetRow)) {
-             // Remove previous indicators
-            clearDragOverIndicators();
-            // Add indicator to the current target
-            targetRow.classList.add('drag-over');
-        }
-    }
-
-    function handleDragLeave(e) {
-        const targetRow = e.target.closest('tr');
-         if (targetRow && recordsTbody.contains(targetRow)) {
-             targetRow.classList.remove('drag-over');
-         }
-         // Also check if leaving tbody entirely
-         if (!recordsTbody.contains(e.relatedTarget)) {
-             clearDragOverIndicators();
-         }
-    }
-
-     function clearDragOverIndicators() {
-        const indicators = recordsTbody.querySelectorAll('.drag-over');
-        indicators.forEach(indicator => indicator.classList.remove('drag-over'));
-     }
-
-
-    function handleDrop(e) {
+        
+        isDragging = true;
+        lastHoveredRow = null; 
+        draggedItem.classList.add('dragging'); 
+        document.body.classList.add('is-dragging'); // Add class to body
+        document.body.style.userSelect = 'none';
+        
         e.preventDefault();
-         clearDragOverIndicators();
-
-        const targetRow = e.target.closest('tr');
-        if (targetRow && draggedItem && targetRow !== draggedItem && recordsTbody.contains(targetRow)) {
-            const draggedId = draggedItem.dataset.id;
-            const targetId = targetRow.dataset.id;
-
-            // Determine if dropping before or after the targetRow based on drop position
-            const rect = targetRow.getBoundingClientRect();
-            const dropBefore = e.clientY < rect.top + rect.height / 2;
-
-            // Find the indices in the actual data array based on the current order in the DOM
-            const rows = Array.from(recordsTbody.children);
-            const draggedIndex = rows.findIndex(row => row.dataset.id === draggedId);
-            const targetIndex = rows.findIndex(row => row.dataset.id === targetId);
-
-            if (draggedIndex !== -1 && targetIndex !== -1) {
-                 // Call the callback provided by main.js to handle the actual data reordering
-                if (onDropCallback) {
-                    onDropCallback(draggedId, targetId, dropBefore);
-                }
-            } else {
-                 console.warn("Could not find dragged or target element index for reordering.");
-             }
+    }
+    
+    function handleTouchStart(e) {
+        const dragHandle = e.target.closest('.drag-handle');
+        if (!dragHandle || isDragging) return;
+        
+        const touch = e.touches[0];
+        touchStartY = touch.clientY;
+        lastTouchY = touch.clientY;
+        
+        draggedItem = e.target.closest('tr');
+        if (!draggedItem || !draggedItem.dataset.id) {
+             draggedItem = null;
+             return;
         }
-         // Clean up dragged item reference handled in dragend
+
+        isDragging = true;
+        lastHoveredRow = null;
+        draggedItem.classList.add('dragging');
+        document.body.classList.add('is-dragging'); // Add class to body
+        document.body.style.userSelect = 'none';
+
+        if (e.cancelable) e.preventDefault();
+    }
+    
+    function handleMouseMove(e) {
+        if (!isDragging || !draggedItem) return;
+        processMove(e.clientY, e.clientX);
+        e.preventDefault(); // Prevent other interactions like text selection
+    }
+    
+    function handleTouchMove(e) {
+        if (!isDragging || !draggedItem) return;
+        
+        const touch = e.touches[0];
+        lastTouchY = touch.clientY;
+        processMove(touch.clientY, touch.clientX);
+        if (e.cancelable) e.preventDefault(); // Prevent scrolling during drag
     }
 
+    function processMove(y, x) {
+        // Auto-scroll logic
+        const containerRect = recordsContainer.getBoundingClientRect();
+        if (y < containerRect.top + scrollSensitivity) {
+            startAutoScroll(-1);
+        } else if (y > containerRect.bottom - scrollSensitivity) {
+            startAutoScroll(1);
+        } else {
+            stopAutoScroll();
+        }
+
+        // Find the element directly under the pointer/touch
+        // Temporarily hide dragged item to find element underneath
+        draggedItem.style.visibility = 'hidden';
+        const elementUnderPointer = document.elementFromPoint(x, y);
+        draggedItem.style.visibility = ''; // Make it visible again
+
+        if (!elementUnderPointer) return;
+
+        const targetRow = elementUnderPointer.closest('tr[data-id]');
+
+        // If hovering over a valid row (and not the dragged item itself or the last hovered row)
+        if (targetRow && targetRow !== draggedItem && targetRow !== lastHoveredRow && recordsContainer.contains(targetRow)) {
+            performSwap(targetRow);
+        }
+    }
+
+    function startAutoScroll(direction) {
+        if (scrollInterval) return; // Already scrolling
+        scrollInterval = setInterval(() => {
+            recordsContainer.scrollTop += direction * scrollSpeed;
+        }, 20);
+    }
+
+    function stopAutoScroll() {
+        clearInterval(scrollInterval);
+        scrollInterval = null;
+    }
+    
     function handleDragEnd(e) {
-         // Clean up styling regardless of whether drop was successful
-        if (draggedItem) {
-             draggedItem.classList.remove('dragging');
-        }
-        clearDragOverIndicators();
-        draggedItem = null;
-    }
+        if (!isDragging) return;
+        
+        stopAutoScroll();
+        document.body.classList.remove('is-dragging'); // Remove class from body
+        document.body.style.userSelect = '';
 
+        if (draggedItem) {
+            const draggedId = draggedItem.dataset.id;
+            let targetId = null;
+            let insertBefore = false;
+
+            // Determine final position based on siblings
+            const nextSibling = draggedItem.nextElementSibling;
+            const previousSibling = draggedItem.previousElementSibling;
+
+            if (nextSibling && nextSibling.dataset.id) {
+                targetId = nextSibling.dataset.id;
+                insertBefore = true;
+            } else if (previousSibling && previousSibling.dataset.id) {
+                targetId = previousSibling.dataset.id;
+                insertBefore = false;
+            } else {
+                 // Dropped at the beginning (no previous data sibling) 
+                 // or it's the only item left
+                 insertBefore = true; // Signal to insert at beginning/prepend
+                 // targetId remains null, callback handles this
+            }
+            
+            // Trigger callback with final position
+             if (onDropCallback) {
+                 onDropCallback(draggedId, targetId, insertBefore);
+             }
+
+            draggedItem.classList.remove('dragging');
+        }
+        
+        // Reset state
+        isDragging = false;
+        draggedItem = null;
+        lastHoveredRow = null;
+        
+        if (e && e.type === 'touchend' && e.cancelable) {
+            e.preventDefault();
+        }
+    }
+    
     return {
-        init
+        init,
+        cleanup
     };
 })();
 

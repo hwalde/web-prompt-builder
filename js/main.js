@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadData();
         setupEventListeners();
         renderUI();
-        DragDrop.init(recordsTbody, handleRecordDrop); // Initialize Drag & Drop
+        // DragDrop will be initialized in renderRecords
         UI.init({ // Provide callbacks to UI module
             onSelect: handleRecordSelect,
             onEdit: handleRecordEdit,
@@ -78,8 +78,85 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderUI() {
         UI.populateProfileSelect(profiles, activeProfileName);
-        UI.renderRecordsTable(currentRecords);
+        renderRecords();
         UI.updateXmlRootTagInput(xmlRootTag);
+    }
+
+    function renderRecords() {
+        const recordsTbody = document.getElementById('records-tbody');
+        const currentProfileNameEl = document.getElementById('current-profile-name');
+        
+        currentProfileNameEl.textContent = activeProfileName;
+        recordsTbody.innerHTML = '';
+
+        // Check if there are no records
+        if (currentRecords.length === 0) {
+            const row = document.createElement('tr');
+            const cell = document.createElement('td');
+            cell.colSpan = 4; // Updated to 4 columns (drag + select + name + actions)
+            cell.textContent = 'Keine Datensätze für dieses Profil vorhanden.';
+            cell.style.textAlign = 'center';
+            cell.style.fontStyle = 'italic';
+            cell.style.color = 'var(--text-muted)';
+            row.appendChild(cell);
+            recordsTbody.appendChild(row);
+            return;
+        }
+
+        currentRecords.forEach(record => {
+            const row = document.createElement('tr');
+            row.dataset.id = record.id;
+            
+            row.innerHTML = `
+                <td class="col-drag">
+                    <div class="drag-handle" title="Ziehen um zu verschieben">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                        </svg>
+                    </div>
+                </td>
+                <td class="col-select">
+                    <input type="checkbox" data-id="${record.id}" class="record-checkbox" ${record.selected ? 'checked' : ''}>
+                </td>
+                <td class="col-name">${Utils.escapeHtml(record.name)}</td>
+                <td class="col-actions">
+                    <div class="action-buttons">
+                        <button class="btn btn-primary edit-record-btn" data-id="${record.id}">Bearbeiten</button>
+                        <button class="btn btn-danger delete-record-btn" data-id="${record.id}">Löschen</button>
+                    </div>
+                </td>
+            `;
+            
+            recordsTbody.appendChild(row);
+        });
+        
+        // Add event listeners to the new buttons and checkboxes
+        recordsTbody.querySelectorAll('.record-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                if (handleRecordSelect) {
+                    handleRecordSelect(e.target.dataset.id, e.target.checked);
+                }
+            });
+        });
+        
+        recordsTbody.querySelectorAll('.edit-record-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                if (handleRecordEdit) {
+                    handleRecordEdit(e.target.dataset.id);
+                }
+            });
+        });
+        
+        recordsTbody.querySelectorAll('.delete-record-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                if (handleRecordDelete && confirm(`Möchten Sie diesen Datensatz wirklich löschen?`)) {
+                    handleRecordDelete(e.target.dataset.id);
+                }
+            });
+        });
+        
+        // Re-initialize DragDrop with the current tbody
+        DragDrop.init(recordsTbody, handleRecordReordering);
     }
 
     // --- Event Listeners Setup ---
@@ -239,42 +316,37 @@ document.addEventListener('DOMContentLoaded', () => {
         renderUI(); // Re-render table
     }
 
-    // Called by DragDrop module when a row is dropped
-     function handleRecordDrop(draggedId, targetId, dropBefore) {
-        const draggedIndex = currentRecords.findIndex(r => r.id === draggedId);
-        let targetIndex = currentRecords.findIndex(r => r.id === targetId);
-
+    function handleRecordReordering(draggedId, targetId, insertBefore) {
+        // Find indices in the currentRecords array
+        const draggedIndex = currentRecords.findIndex(record => record.id === draggedId);
+        const targetIndex = currentRecords.findIndex(record => record.id === targetId);
+        
         if (draggedIndex === -1 || targetIndex === -1) {
-            console.warn("Could not find items for reorder:", draggedId, targetId);
-            return; // Should not happen if DOM is in sync
+            console.error('Could not find items for reordering');
+            return;
         }
-
+        
         // Remove the dragged item
         const [draggedItem] = currentRecords.splice(draggedIndex, 1);
-
-         // Calculate the new target index after removal
-         // Re-find target index as it might have shifted after splice
-         targetIndex = currentRecords.findIndex(r => r.id === targetId);
-
-         if (targetIndex === -1) { // Target was the one removed (shouldn't happen in move)
-             console.warn("Target index lost after splice");
-             // Fallback: append to end or handle error
-              currentRecords.push(draggedItem);
-         } else {
-              // Insert at the correct position
-              if (dropBefore) {
-                  currentRecords.splice(targetIndex, 0, draggedItem);
-              } else {
-                  // Insert after the target item
-                  currentRecords.splice(targetIndex + 1, 0, draggedItem);
-              }
-         }
-
-
+        
+        // Calculate new position, accounting for the removed item
+        let newPosition = targetIndex;
+        if (draggedIndex < targetIndex) {
+            newPosition -= 1;
+        }
+        
+        // If inserting after, add 1 to the position
+        if (!insertBefore) {
+            newPosition += 1;
+        }
+        
+        // Insert at the new position
+        currentRecords.splice(newPosition, 0, draggedItem);
+        
+        // Save and re-render
         saveData();
-        renderUI(); // Re-render the table in the new order
+        renderUI();
     }
-
 
     function handleGenerateTraditional() {
         const selectedRecords = currentRecords.filter(r => r.selected);
@@ -323,7 +395,6 @@ document.addEventListener('DOMContentLoaded', () => {
          // Save immediately or rely on the general saveData triggered elsewhere
          Storage.saveXmlRootTag(xmlRootTag); // Save this specific value
     }
-
 
     function copyToClipboard(text, buttonElement) {
         // Check if Clipboard API is available

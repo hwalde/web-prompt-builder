@@ -44,87 +44,8 @@ const UI = (() => {
     }
 
     function renderRecordsTable(records) {
-        if (!recordsTbody) return;
-        recordsTbody.innerHTML = ''; // Clear existing rows
-
-        if (!records || records.length === 0) {
-            const row = recordsTbody.insertRow();
-            const cell = row.insertCell();
-            cell.colSpan = 3; // Span across all columns
-            cell.textContent = 'Keine Datensätze für dieses Profil vorhanden.';
-            cell.style.textAlign = 'center';
-            cell.style.fontStyle = 'italic';
-            cell.style.color = 'var(--text-muted)';
-            return;
-        }
-
-        records.forEach((record, index) => {
-            const row = recordsTbody.insertRow();
-            row.dataset.id = record.id; // Store ID on the row
-            row.draggable = true; // Make row draggable
-            
-            // Add double-click handler to trigger edit functionality
-            row.addEventListener('dblclick', () => {
-                if (recordActionCallbacks.onEdit) {
-                    recordActionCallbacks.onEdit(record.id);
-                }
-            });
-
-            // 1. Select Checkbox
-            const selectCell = row.insertCell();
-            selectCell.classList.add('col-select');
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.checked = record.selected || false;
-            checkbox.dataset.id = record.id;
-            checkbox.title = "Diesen Datensatz für die Generierung auswählen";
-            checkbox.addEventListener('change', (e) => {
-                if (recordActionCallbacks.onSelect) {
-                    recordActionCallbacks.onSelect(record.id, e.target.checked);
-                }
-            });
-            selectCell.appendChild(checkbox);
-
-            // 2. Name
-            const nameCell = row.insertCell();
-            nameCell.classList.add('col-name');
-            nameCell.textContent = record.name || '(Unbenannt)';
-
-            // 3. Actions
-            const actionsCell = row.insertCell();
-            actionsCell.classList.add('col-actions');
-            const buttonDiv = document.createElement('div');
-            buttonDiv.classList.add('action-buttons');
-
-            // Edit Button
-            const editButton = document.createElement('button');
-            editButton.textContent = 'Bearbeiten';
-            editButton.classList.add('btn', 'btn-warning');
-            editButton.dataset.id = record.id;
-            editButton.addEventListener('click', () => {
-                if (recordActionCallbacks.onEdit) {
-                    recordActionCallbacks.onEdit(record.id);
-                }
-            });
-            buttonDiv.appendChild(editButton);
-
-            // Delete Button
-            const deleteButton = document.createElement('button');
-            deleteButton.textContent = 'Löschen';
-            deleteButton.classList.add('btn', 'btn-danger');
-            deleteButton.dataset.id = record.id;
-            deleteButton.addEventListener('click', () => {
-                if (recordActionCallbacks.onDelete) {
-                     // Add confirmation before deleting
-                    if (confirm(`Möchten Sie den Datensatz "${record.name || '(Unbenannt)'}" wirklich löschen?`)) {
-                        recordActionCallbacks.onDelete(record.id);
-                    }
-                }
-            });
-            buttonDiv.appendChild(deleteButton);
-
-            actionsCell.appendChild(buttonDiv);
-        });
+        console.log('UI.renderRecordsTable is deprecated, use renderRecords in main.js instead');
+        // Keep this function as a no-op for backwards compatibility
     }
 
      function updateXmlRootTagInput(tagName) {
