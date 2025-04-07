@@ -62,6 +62,13 @@ const UI = (() => {
             const row = recordsTbody.insertRow();
             row.dataset.id = record.id; // Store ID on the row
             row.draggable = true; // Make row draggable
+            
+            // Add double-click handler to trigger edit functionality
+            row.addEventListener('dblclick', () => {
+                if (recordActionCallbacks.onEdit) {
+                    recordActionCallbacks.onEdit(record.id);
+                }
+            });
 
             // 1. Select Checkbox
             const selectCell = row.insertCell();

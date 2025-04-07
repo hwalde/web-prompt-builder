@@ -52,12 +52,16 @@
                     <span class="btn-icon"></span>
                     Generiere Traditional Prompt
                 </button>
+                <div class="divider-vertical"></div>
                 <div class="xml-generation">
-                     <button id="generate-xml-btn" class="btn btn-success btn-generate">
+                    <button id="generate-xml-btn" class="btn btn-success btn-generate">
                         <span class="btn-icon"></span>
                         Generiere XML Prompt
                     </button>
-                    <input type="text" id="xml-root-tag" placeholder="XML Document Main Tag Name" value="prompt">
+                    <div class="xml-root-tag-container">
+                        <label class="xml-root-tag-label">Root Tag Name:</label> 
+                        <input type="text" id="xml-root-tag" placeholder="XML Document Root Tag Name" value="prompt">
+                    </div>
                 </div>
 
             </div>
