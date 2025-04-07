@@ -1,0 +1,217 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px; /* Basis für rem Einheiten */
+}
+
+body {
+    font-family: var(--font-family);
+    line-height: 1.6;
+    background-color: var(--light-color);
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding: var(--spacing-unit);
+}
+
+header {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    padding: var(--spacing-unit);
+    margin-bottom: calc(var(--spacing-unit) * 1.5);
+    border-radius: var(--border-radius);
+    text-align: center;
+}
+
+main {
+    flex-grow: 1;
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+section {
+    background-color: var(--white-color);
+    padding: calc(var(--spacing-unit) * 1.5);
+    margin-bottom: calc(var(--spacing-unit) * 1.5);
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+h1, h2 {
+    margin-bottom: var(--spacing-unit);
+    color: var(--primary-color);
+}
+h1 { color: var(--white-color); }
+h2 { border-bottom: 1px solid var(--border-color); padding-bottom: 0.5em;}
+
+label {
+    display: block;
+    margin-bottom: 0.5em;
+    font-weight: bold;
+}
+
+input[type="text"],
+select,
+textarea {
+    width: 100%;
+    padding: 0.75em 1em;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    margin-bottom: var(--spacing-unit);
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+input[type="text"]:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+button, .btn {
+    display: inline-flex; /* Wichtig für Icon + Text Alignment */
+    align-items: center;
+    justify-content: center;
+    padding: 0.6em 1.2em;
+    font-size: 1rem;
+    border-radius: var(--border-radius);
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    margin: 0.25em; /* Kleiner Abstand zwischen Buttons */
+    vertical-align: middle; /* Hilft bei Inline-Ausrichtung */
+    gap: 0.5em; /* Abstand zwischen Icon und Text */
+}
+button:hover, .btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+button:active, .btn:active {
+   transform: translateY(0px);
+   box-shadow: none;
+}
+
+
+.btn-primary { background-color: var(--primary-color); color: var(--white-color); }
+.btn-secondary { background-color: var(--secondary-color); color: var(--white-color); }
+.btn-success { background-color: var(--success-color); color: var(--white-color); }
+.btn-danger { background-color: var(--danger-color); color: var(--white-color); }
+.btn-warning { background-color: var(--warning-color); color: var(--dark-color); } /* Besserer Kontrast für Gelb */
+
+.btn-icon {
+    display: inline-block;
+    width: 1em; /* Breite für Icon Platzhalter */
+    height: 1em; /* Höhe für Icon Platzhalter */
+    /* Style für das eigentliche Icon (z.B. Checkmark) kommt in animations.css */
+}
+
+.profile-controls,
+.generation-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-unit);
+    align-items: center;
+    margin-bottom: var(--spacing-unit);
+}
+
+.profile-controls label {
+    margin-bottom: 0; /* Kein Abstand unter dem Label in dieser Zeile */
+    margin-right: 0.5em;
+}
+
+.profile-controls select {
+     flex-grow: 1; /* Select nimmt verfügbaren Platz */
+     margin-bottom: 0; /* Kein Abstand unter dem Select in dieser Zeile */
+     min-width: 150px;
+}
+
+.xml-generation {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-unit);
+    align-items: center;
+}
+.xml-generation input[type="text"] {
+     flex-grow: 1; /* Input nimmt verfügbaren Platz */
+     margin-bottom: 0; /* Kein Abstand unter dem Input in dieser Zeile */
+     min-width: 200px;
+}
+
+
+#add-record-btn {
+    margin-bottom: var(--spacing-unit);
+}
+
+.drag-hint {
+    font-size: 0.9em;
+    color: var(--text-muted);
+    text-align: right;
+    margin-top: 0.5em;
+}
+
+.copy-feedback {
+    margin-top: 1em;
+    padding: 0.5em 1em;
+    border-radius: var(--border-radius);
+    background-color: var(--success-color);
+    color: var(--white-color);
+    opacity: 0;
+    transition: opacity 0.5s ease-out;
+    text-align: center;
+}
+
+.copy-feedback.visible {
+    opacity: 1;
+}
+
+
+footer {
+    text-align: center;
+    margin-top: calc(var(--spacing-unit) * 2);
+    padding: var(--spacing-unit);
+    color: var(--text-muted);
+    font-size: 0.9em;
+}
+
+/* Hilfsklassen */
+.hidden {
+    display: none !important;
+}
+
+/* Responsivität */
+@media (max-width: 768px) {
+    .profile-controls,
+    .generation-controls,
+    .xml-generation {
+         flex-direction: column;
+         align-items: stretch;
+    }
+    .profile-controls select,
+    .xml-generation input[type="text"] {
+         width: 100%;
+    }
+
+     main {
+         padding-left: 5px;
+         padding-right: 5px;
+     }
+     section {
+         padding: var(--spacing-unit);
+     }
+}

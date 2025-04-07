@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Builder</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/table.css">
+    <link rel="stylesheet" href="css/modal.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
+</head>
+<body>
+    <header>
+        <h1>Prompt Builder</h1>
+    </header>
+
+    <main>
+        <section id="profile-section">
+            <h2>Profile Management</h2>
+            <div class="profile-controls">
+                <label for="profile-select">Aktives Profil:</label>
+                <select id="profile-select"></select>
+                <button id="new-profile-btn" class="btn btn-secondary">Neues Profil</button>
+                <button id="rename-profile-btn" class="btn btn-secondary">Profil umbenennen</button>
+                <button id="delete-profile-btn" class="btn btn-danger">Profil löschen</button>
+            </div>
+        </section>
+
+        <section id="records-section">
+            <h2>Daten für Profil: <span id="current-profile-name"></span></h2>
+            <button id="add-record-btn" class="btn btn-primary">Neuen Datensatz hinzufügen</button>
+            <table id="records-table">
+                <thead>
+                    <tr>
+                        <th class="col-select">Auswählen</th>
+                        <th class="col-name">Name</th>
+                        <th class="col-actions">Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody id="records-tbody">
+                    </tbody>
+            </table>
+             <p class="drag-hint">💡 Datensätze können per Drag & Drop umsortiert werden.</p>
+        </section>
+
+        <section id="generation-section">
+            <h2>Prompt Generierung</h2>
+            <div class="generation-controls">
+                <button id="generate-traditional-btn" class="btn btn-success btn-generate">
+                    <span class="btn-icon"></span>
+                    Generiere Traditional Prompt
+                </button>
+                <div class="xml-generation">
+                     <button id="generate-xml-btn" class="btn btn-success btn-generate">
+                        <span class="btn-icon"></span>
+                        Generiere XML Prompt
+                    </button>
+                    <input type="text" id="xml-root-tag" placeholder="XML Document Main Tag Name" value="prompt">
+                </div>
+
+            </div>
+             <div id="copy-feedback" class="copy-feedback" aria-live="polite"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Prompt Builder - Daten werden lokal im Browser gespeichert.</p>
+    </footer>
+
+    <div id="modal-overlay" class="modal-overlay hidden"></div>
+    <div id="modal-container" class="modal-container hidden">
+         <button id="modal-close-x" class="modal-close-x" aria-label="Schließen">&times;</button>
+        <div id="modal-content" class="modal-content">
+            <input type="hidden" id="modal-record-id">
+            <div class="form-group">
+                <label for="modal-name">Name:</label>
+                <input type="text" id="modal-name" required>
+            </div>
+            <div class="form-group form-group-checkbox">
+                <input type="checkbox" id="modal-escape">
+                <label for="modal-escape">Escape with `-Chars</label>
+            </div>
+            <div class="form-group form-group-textarea">
+                <label for="modal-content-area">Inhalt:</label>
+                <textarea id="modal-content-area"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button id="modal-close-btn" class="btn btn-primary">Schließen & Speichern</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/modal.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/dragdrop.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

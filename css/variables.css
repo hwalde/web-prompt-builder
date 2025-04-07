@@ -1,0 +1,39 @@
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    --white-color: #ffffff;
+    --border-color: #dee2e6;
+    --text-color: #212529;
+    --text-muted: #6c757d;
+
+    --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    --border-radius: 0.3rem;
+    --spacing-unit: 1rem; /* 16px if root font-size is 16px */
+
+    --modal-overlay-bg: rgba(0, 0, 0, 0.6);
+    --modal-bg: var(--white-color);
+    --modal-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    --modal-margin: 20px;
+    --modal-padding: 10px;
+}
+
+body.dark-mode { /* Optional: Beispiel für Dark Mode */
+    --primary-color: #0d6efd;
+    --secondary-color: #adb5bd;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffca2c;
+    --light-color: #343a40;
+    --dark-color: #f8f9fa;
+    --white-color: #212529;
+    --border-color: #495057;
+    --text-color: #f8f9fa;
+    --text-muted: #adb5bd;
+    --modal-overlay-bg: rgba(255, 255, 255, 0.1);
+    --modal-bg: #2b3035;
+}
