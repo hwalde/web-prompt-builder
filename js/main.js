@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateXmlBtn = document.getElementById('generate-xml-btn');
     const xmlRootTagInput = document.getElementById('xml-root-tag');
     const recordsTbody = document.getElementById('records-tbody');
+    const currentTaskTextarea = document.getElementById('current-task-textarea');
 
     // --- Initialization ---
 
@@ -42,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
             Storage.saveProfiles(profiles);
             activeProfileName = defaultName;
             Storage.saveActiveProfileName(activeProfileName);
+            Storage.saveCurrentTask(activeProfileName, '');
         }
 
         // Ensure the active profile exists, otherwise select the first one
@@ -50,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
             Storage.saveActiveProfileName(activeProfileName);
         }
 
-        // Load records for the active profile
+        // Load records and current task for the active profile
         loadCurrentRecords();
     }
 
@@ -79,7 +81,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderUI() {
         UI.populateProfileSelect(profiles, activeProfileName);
         renderRecords();
+        renderCurrentTask();
         UI.updateXmlRootTagInput(xmlRootTag);
+    }
+
+    function renderCurrentTask() {
+        if (currentTaskTextarea) {
+            const taskText = activeProfileName ? Storage.loadCurrentTask(activeProfileName) : '';
+            currentTaskTextarea.value = taskText;
+        }
     }
 
     function renderRecords() {
@@ -171,6 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
         generateXmlBtn.addEventListener('click', handleGenerateXml);
         xmlRootTagInput.addEventListener('input', Utils.debounce(handleXmlRootTagChange, 300));
          xmlRootTagInput.addEventListener('change', handleXmlRootTagChange); // Save on blur/enter too
+         currentTaskTextarea.addEventListener('input', Utils.debounce(handleCurrentTaskChange, 500));
     }
 
     // --- Event Handlers ---
@@ -181,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
             activeProfileName = newActiveProfile;
             Storage.saveActiveProfileName(activeProfileName); // Persist selection immediately
             loadCurrentRecords();
-            renderUI(); // Re-render table for the new profile
+            renderUI(); // Re-render table and load current task for the new profile
         }
     }
 
@@ -197,7 +208,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     activeProfileName = trimmedName; // Switch to the new profile
                     loadCurrentRecords();
                     saveData(); // Saves the new active profile name
-                    renderUI(); // Update the dropdown and table
+                    Storage.saveCurrentTask(activeProfileName, '');
+                    renderUI(); // Update the dropdown, table, and task area
                } else {
                     alert("Profil konnte nicht erstellt werden.");
                }
@@ -222,8 +234,8 @@ document.addEventListener('DOMContentLoaded', () => {
                      activeProfileName = trimmedName; // Update active name
                      // No need to reload records, they are associated with the renamed profile
                      saveData(); // Saves potentially updated active profile name
-                     renderUI(); // Update dropdown selection and title
-                     alert(`Profil "<span class="math-inline">\{oldName\}" wurde in "</span>{trimmedName}" umbenannt.`);
+                     renderUI(); // Update dropdown selection, title, and task area
+                     alert(`Profil "${oldName}" wurde in "${trimmedName}" umbenannt.`);
                  } else {
                      alert("Profil konnte nicht umbenannt werden.");
                  }
@@ -240,6 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
              const nameToDelete = activeProfileName;
             if (Storage.deleteProfile(nameToDelete)) {
                  profiles = Storage.loadProfiles(); // Reload profiles state
+                 Storage.deleteCurrentTask(nameToDelete);
                  // Select the first available profile or null
                  activeProfileName = Object.keys(profiles)[0] || null;
                  loadCurrentRecords();
@@ -350,31 +363,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleGenerateTraditional() {
         const selectedRecords = currentRecords.filter(r => r.selected);
-        if (selectedRecords.length === 0) {
-            alert("Bitte wählen Sie mindestens einen Datensatz zum Generieren aus.");
-            return;
-        }
+        const taskText = currentTaskTextarea.value.trim();
+
+        if (selectedRecords.length === 0 && !taskText) {
+             alert("Bitte wählen Sie mindestens einen Datensatz zum Generieren aus oder geben Sie eine Aufgabe ein.");
+             return;
+         }
 
         const promptParts = selectedRecords.map(record => {
             let content = record.content || '';
             if (record.escape) {
                 // Add ``` on separate lines, ensure no extra newlines if content is empty
                  content = content.trim() === '' ? '```\n```' : `\`\`\`\n${content}\n\`\`\``;
-            }
+            } 
             return content;
         });
 
-        const finalPrompt = promptParts.join('\n\n'); // Join with two newlines
+        let finalPrompt = promptParts.join('\n\n'); // Join with two newlines
+
+        if (taskText) {
+             // Add task only if there's text, add extra newline if there were previous parts
+             if (finalPrompt) {
+                 finalPrompt += '\n\n';
+             }
+             finalPrompt += `Your current task:\\n${taskText}`;
+        }
 
         copyToClipboard(finalPrompt, generateTraditionalBtn);
     }
 
     function handleGenerateXml() {
         const selectedRecords = currentRecords.filter(r => r.selected);
-        if (selectedRecords.length === 0) {
-            alert("Bitte wählen Sie mindestens einen Datensatz zum Generieren aus.");
-            return;
-        }
+        const taskText = currentTaskTextarea.value.trim();
+
+         if (selectedRecords.length === 0 && !taskText) {
+             alert("Bitte wählen Sie mindestens einen Datensatz zum Generieren aus oder geben Sie eine Aufgabe ein.");
+             return;
+         }
 
         const rootTagName = Utils.escapeXmlName(xmlRootTag.trim() || 'prompt');
         let xmlString = `<${rootTagName}>\n`;
@@ -385,6 +410,11 @@ document.addEventListener('DOMContentLoaded', () => {
             xmlString += `  <${tagName}>${content}</${tagName}>\n`; // Indent for readability
         });
 
+        if (taskText) {
+            const escapedTaskText = Utils.escapeXmlContent(taskText);
+            xmlString += `  <userPrompt>${escapedTaskText}</userPrompt>\n`; // Add userPrompt tag
+        }
+
         xmlString += `</${rootTagName}>`;
 
         copyToClipboard(xmlString, generateXmlBtn);
@@ -394,6 +424,13 @@ document.addEventListener('DOMContentLoaded', () => {
          xmlRootTag = e.target.value.trim();
          // Save immediately or rely on the general saveData triggered elsewhere
          Storage.saveXmlRootTag(xmlRootTag); // Save this specific value
+    }
+
+    function handleCurrentTaskChange(e) {
+         if (activeProfileName) {
+            const taskText = e.target.value;
+            Storage.saveCurrentTask(activeProfileName, taskText);
+         }
     }
 
     function copyToClipboard(text, buttonElement) {

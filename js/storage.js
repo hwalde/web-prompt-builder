@@ -1,6 +1,7 @@
 const PROFILES_KEY = 'promptBuilderProfiles';
 const ACTIVE_PROFILE_KEY = 'promptBuilderActiveProfile';
 const XML_ROOT_TAG_KEY = 'promptBuilderXmlRootTag';
+const CURRENT_TASK_KEY_PREFIX = 'promptBuilderCurrentTask_'; // Prefix for profile-specific task
 
 const Storage = {
     /**
@@ -152,6 +153,48 @@ const Storage = {
              return true;
          }
          return false;
+    },
+
+    /**
+     * Lädt den aktuellen Task-Text für ein bestimmtes Profil.
+     * @param {string} profileName Der Name des Profils.
+     * @returns {string} Der gespeicherte Task-Text oder ein leerer String.
+     */
+    loadCurrentTask: (profileName) => {
+        if (!profileName) return '';
+        try {
+            return localStorage.getItem(CURRENT_TASK_KEY_PREFIX + profileName) || '';
+        } catch (e) {
+            console.error("Error loading current task from LocalStorage:", e);
+            return '';
+        }
+    },
+
+    /**
+     * Speichert den aktuellen Task-Text für ein bestimmtes Profil.
+     * @param {string} profileName Der Name des Profils.
+     * @param {string} taskText Der zu speichernde Text.
+     */
+    saveCurrentTask: (profileName, taskText) => {
+        if (!profileName) return;
+        try {
+            localStorage.setItem(CURRENT_TASK_KEY_PREFIX + profileName, taskText || '');
+        } catch (e) {
+            console.error("Error saving current task to LocalStorage:", e);
+        }
+    },
+
+    /**
+     * Löscht den Task-Text für ein bestimmtes Profil (wird beim Löschen des Profils benötigt).
+     * @param {string} profileName Der Name des Profils.
+     */
+    deleteCurrentTask: (profileName) => {
+        if (!profileName) return;
+        try {
+            localStorage.removeItem(CURRENT_TASK_KEY_PREFIX + profileName);
+        } catch (e) {
+            console.error("Error deleting current task from LocalStorage:", e);
+        }
     }
 };
 
