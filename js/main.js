@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const xmlRootTagInput = document.getElementById('xml-root-tag');
     const recordsTbody = document.getElementById('records-tbody');
     const currentTaskTextarea = document.getElementById('current-task-textarea');
+    const importProfileBtn = document.getElementById('import-profile-btn');
+    const exportProfileBtn = document.getElementById('export-profile-btn');
 
     // --- Initialization ---
 
@@ -27,6 +29,19 @@ document.addEventListener('DOMContentLoaded', () => {
             onSelect: handleRecordSelect,
             onEdit: handleRecordEdit,
             onDelete: handleRecordDelete
+        });
+
+        // Initialize ImportExport module with dependencies
+        ImportExport.init({
+            profiles: profiles, // Pass the state object
+            getActiveProfileName: () => activeProfileName, // Function to get current name
+            updateActiveProfileName: (newName) => { activeProfileName = newName; }, // Function to set current name
+            Storage: Storage, 
+            Utils: Utils, 
+            UI: UI,
+            loadCurrentRecords: loadCurrentRecords,
+            renderUI: renderUI,
+            renderCurrentTask: renderCurrentTask
         });
     }
 
@@ -56,6 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentProfile = profiles[activeProfileName];
         const currentXmlRootTag = currentProfile?.xmlRootTag || 'prompt';
         if (xmlRootTagInput) xmlRootTagInput.value = currentXmlRootTag;
+
+        exportProfileBtn.addEventListener('click', ImportExport.handleExportProfile); // Use ImportExport module
     }
 
     function loadCurrentRecords() {
@@ -184,6 +201,8 @@ document.addEventListener('DOMContentLoaded', () => {
         generateXmlBtn.addEventListener('click', handleGenerateXml);
         xmlRootTagInput.addEventListener('change', handleXmlRootTagChange);
         currentTaskTextarea.addEventListener('input', Utils.debounce(handleCurrentTaskChange, 500));
+        importProfileBtn.addEventListener('click', ImportExport.handleImportProfile);
+        exportProfileBtn.addEventListener('click', ImportExport.handleExportProfile);
     }
 
     // --- Event Handlers ---
@@ -451,7 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text)
                 .then(() => {
-                    Utils.showCopyFeedback("Prompt copied to clipboard!");
+                    Utils.showCopyFeedback("Prompt copied to clipboard!", 'copy-feedback');
                     if (buttonElement) {
                         Utils.showCheckAnimation(buttonElement);
                     }
@@ -488,7 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.removeChild(textarea);
             
             if (successful) {
-                Utils.showCopyFeedback("Prompt copied to clipboard!");
+                Utils.showCopyFeedback("Prompt copied to clipboard!", 'copy-feedback');
                 if (buttonElement) {
                     Utils.showCheckAnimation(buttonElement);
                 }
@@ -497,14 +516,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (err) {
             console.error('Fallback: Error copying to clipboard: ', err);
-            Utils.showCopyFeedback("Error copying!", 3000);
+            Utils.showCopyFeedback("Error copying!", 'copy-feedback', 3000);
             alert("Could not copy to clipboard. Please check browser permissions or copy manually from the console (F12).");
             console.log("--- Text to copy ---");
             console.log(text);
             console.log("--------------------------");
         }
     }
-
+  
     // --- Start the application ---
     initializeApp();
 });

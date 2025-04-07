@@ -267,3 +267,16 @@ footer {
     gap: 0.5em;
     width: 100%;
 }
+
+/* Remove obsolete styles for the old import-export section */
+
+/* Responsive adjustments for the new section */
+@media (max-width: 768px) {
+    .import-export-controls {
+         flex-direction: column;
+         align-items: stretch;
+    }
+    .import-export-controls .btn {
+        width: 100%; /* Make buttons full width on smaller screens */
+    }
+}

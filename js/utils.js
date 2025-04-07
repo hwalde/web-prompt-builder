@@ -90,13 +90,17 @@ function debounce(func, delay) {
 }
 
 /**
- * Shows a feedback message for copying.
+ * Shows a feedback message for copying or other actions.
  * @param {string} message The message to display.
- * @param {number} duration Duration in milliseconds.
+ * @param {string} [feedbackElementId='copy-feedback'] The ID of the feedback element to use.
+ * @param {number} [duration=2000] Duration in milliseconds.
  */
-function showCopyFeedback(message = "Copied to clipboard!", duration = 2000) {
-    const feedbackElement = document.getElementById('copy-feedback');
-    if (!feedbackElement) return;
+function showCopyFeedback(message = "Action complete!", feedbackElementId = 'copy-feedback', duration = 2000) {
+    const feedbackElement = document.getElementById(feedbackElementId);
+    if (!feedbackElement) {
+        console.warn(`Feedback element with ID '${feedbackElementId}' not found.`);
+        return;
+    }
 
     feedbackElement.textContent = message;
     feedbackElement.classList.add('visible');
