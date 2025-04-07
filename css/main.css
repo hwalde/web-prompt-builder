@@ -215,3 +215,8 @@ footer {
          padding: var(--spacing-unit);
      }
 }
+
+/* Adjust button styling in action buttons */
+#records-table .action-buttons .btn {
+    margin: 0;
+}

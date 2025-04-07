@@ -326,21 +326,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     function copyToClipboard(text, buttonElement) {
-        navigator.clipboard.writeText(text)
-            .then(() => {
+        // Check if Clipboard API is available
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    Utils.showCopyFeedback("Prompt in die Zwischenablage kopiert!");
+                    if (buttonElement) {
+                        Utils.showCheckAnimation(buttonElement);
+                    }
+                })
+                .catch(err => {
+                    console.error('Fehler beim Kopieren in die Zwischenablage: ', err);
+                    fallbackCopyToClipboard(text, buttonElement);
+                });
+        } else {
+            // Fallback method for browsers without clipboard API support
+            fallbackCopyToClipboard(text, buttonElement);
+        }
+    }
+    
+    function fallbackCopyToClipboard(text, buttonElement) {
+        try {
+            // Create a temporary textarea element
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            
+            // Make the textarea out of viewport
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-999999px';
+            textarea.style.top = '-999999px';
+            
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            
+            // Execute the copy command
+            const successful = document.execCommand('copy');
+            
+            // Remove the temporary element
+            document.body.removeChild(textarea);
+            
+            if (successful) {
                 Utils.showCopyFeedback("Prompt in die Zwischenablage kopiert!");
-                 if (buttonElement) {
-                     Utils.showCheckAnimation(buttonElement);
-                 }
-            })
-            .catch(err => {
-                console.error('Fehler beim Kopieren in die Zwischenablage: ', err);
-                Utils.showCopyFeedback("Fehler beim Kopieren!", 3000);
-                alert("Konnte nicht in die Zwischenablage kopieren. Prüfen Sie die Browser-Berechtigungen oder kopieren Sie manuell aus der Konsole (F12).");
-                console.log("--- Zu kopierender Text ---");
-                console.log(text);
-                console.log("--------------------------");
-            });
+                if (buttonElement) {
+                    Utils.showCheckAnimation(buttonElement);
+                }
+            } else {
+                throw new Error('Copy command was unsuccessful');
+            }
+        } catch (err) {
+            console.error('Fallback: Fehler beim Kopieren in die Zwischenablage: ', err);
+            Utils.showCopyFeedback("Fehler beim Kopieren!", 3000);
+            alert("Konnte nicht in die Zwischenablage kopieren. Prüfen Sie die Browser-Berechtigungen oder kopieren Sie manuell aus der Konsole (F12).");
+            console.log("--- Zu kopierender Text ---");
+            console.log(text);
+            console.log("--------------------------");
+        }
     }
 
     // --- Start the application ---

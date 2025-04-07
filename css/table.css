@@ -35,7 +35,7 @@
 
 #records-table .col-select { width: 80px; text-align: center; }
 #records-table .col-name { /* Nimmt den Rest der Breite */ }
-#records-table .col-actions { width: 180px; text-align: center; }
+#records-table .col-actions { width: 200px; text-align: center; }
 
 #records-table input[type="checkbox"] {
     width: auto; /* Checkbox nicht auf volle Breite */
@@ -45,10 +45,16 @@
     cursor: pointer;
 }
 
+#records-table .action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
 #records-table .action-buttons button {
     padding: 0.4em 0.8em;
     font-size: 0.9rem;
-    margin: 0 0.2em; /* Kleinerer Abstand in der Tabelle */
+    margin: 0; /* Remove margin to avoid extra spacing */
 }
 
 /* Drag & Drop Styling */
