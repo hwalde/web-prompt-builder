@@ -1,4 +1,5 @@
 :root {
+    /* Light Mode Colors */
     --primary-color: #007bff;
     --secondary-color: #6c757d;
     --success-color: #28a745;
@@ -10,30 +11,32 @@
     --border-color: #dee2e6;
     --text-color: #212529;
     --text-muted: #6c757d;
-
-    --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    --border-radius: 0.3rem;
-    --spacing-unit: 1rem; /* 16px if root font-size is 16px */
-
     --modal-overlay-bg: rgba(0, 0, 0, 0.6);
     --modal-bg: var(--white-color);
     --modal-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+
+    /* General Styles */
+    --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    --border-radius: 0.3rem;
+    --spacing-unit: 1rem; /* 16px if root font-size is 16px */
     --modal-margin: 20px;
     --modal-padding: 10px;
 }
 
-body.dark-mode { /* Optional: Example for Dark Mode */
-    --primary-color: #0d6efd;
-    --secondary-color: #adb5bd;
-    --success-color: #198754;
-    --danger-color: #dc3545;
-    --warning-color: #ffca2c;
-    --light-color: #343a40;
-    --dark-color: #f8f9fa;
-    --white-color: #212529;
-    --border-color: #495057;
-    --text-color: #f8f9fa;
-    --text-muted: #adb5bd;
-    --modal-overlay-bg: rgba(255, 255, 255, 0.1);
-    --modal-bg: #2b3035;
+body.dark-mode { 
+    /* Dark Mode Color Overrides */
+    --primary-color: #0d6efd; /* Slightly brighter blue */
+    --secondary-color: #adb5bd; /* Lighter grey */
+    --success-color: #198754; /* Darker green */
+    --danger-color: #e06c75; /* Softer red */
+    --warning-color: #e5c07b; /* Softer yellow/orange */
+    --light-color: #343a40; /* Dark grey, used for lighter elements in dark mode */
+    --dark-color: #f8f9fa; /* Light grey, used for darker elements in dark mode */
+    --white-color: #212529; /* Very dark grey, used for backgrounds */
+    --border-color: #495057; /* Medium grey */
+    --text-color: #f8f9fa; /* Light text */
+    --text-muted: #adb5bd; /* Lighter grey text */
+    --modal-overlay-bg: rgba(255, 255, 255, 0.1); /* More subtle overlay */
+    --modal-bg: #2b3035; /* Dark modal background */
+    --modal-shadow: 0 5px 15px rgba(255, 255, 255, 0.05); /* Lighter shadow */
 }

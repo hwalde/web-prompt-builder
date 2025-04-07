@@ -19,6 +19,14 @@ body {
     padding: var(--spacing-unit);
 }
 
+/* Dark mode focus styles */
+body.dark-mode input[type="text"]:focus,
+body.dark-mode select:focus,
+body.dark-mode textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.4); /* Adjusted focus color for dark mode */
+}
+
 header {
     background-color: var(--primary-color);
     color: var(--white-color);
@@ -26,7 +34,11 @@ header {
     margin-bottom: calc(var(--spacing-unit) * 1.5);
     border-radius: var(--border-radius);
     text-align: center;
+    position: relative; /* Needed for absolute positioning of toggle */
+    position: relative; /* Needed for absolute positioning of toggle */
 }
+
+header h1 { margin-bottom: 5px; }
 
 main {
     flex-grow: 1;
@@ -48,6 +60,7 @@ h1, h2 {
     color: var(--primary-color);
 }
 h1 { color: var(--white-color); }
+body.dark-mode header h1 { color: var(--dark-color); }
 h2 { border-bottom: 1px solid var(--border-color); padding-bottom: 0.5em;}
 
 label {
@@ -107,12 +120,14 @@ button:active, .btn:active {
    box-shadow: none;
 }
 
-
 .btn-primary { background-color: var(--primary-color); color: var(--white-color); }
 .btn-secondary { background-color: var(--secondary-color); color: var(--white-color); }
 .btn-success { background-color: var(--success-color); color: var(--white-color); }
 .btn-danger { background-color: var(--danger-color); color: var(--white-color); }
 .btn-warning { background-color: var(--warning-color); color: var(--dark-color); } /* Better contrast for yellow */
+
+/* Dark mode button text color override for warning */
+body.dark-mode .btn-warning { color: var(--white-color); /* Darker text for light button in dark mode */ }
 
 .btn-icon {
     display: inline-block;
@@ -164,7 +179,6 @@ button:active, .btn:active {
      width: 100%;
 }
 
-
 #add-record-btn {
     margin-bottom: var(--spacing-unit);
 }
@@ -190,7 +204,6 @@ button:active, .btn:active {
 .copy-feedback.visible {
     opacity: 1;
 }
-
 
 footer {
     text-align: center;
@@ -241,15 +254,11 @@ footer {
     white-space: nowrap;
 }
 
-
-
 #generate-traditional-btn .btn-icon, 
 #generate-xml-btn .btn-icon {
     position: absolute;
     left: 0.8em;
 }
-
-
 
 #xml-root-tag {
     margin: 0.25em
@@ -279,4 +288,79 @@ footer {
     .import-export-controls .btn {
         width: 100%; /* Make buttons full width on smaller screens */
     }
+}
+
+#dark-mode-toggle-container {
+    position: absolute;
+    margin-top: 5px;
+    top: 50%;
+    right: var(--spacing-unit);
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+}
+
+.dark-mode-label {
+    margin-right: 0.5em;
+    font-size: 0.9em;
+    color: var(--white-color);
+    cursor: pointer;
+}
+
+.dark-mode-switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;  /* Smaller switch */
+    height: 20px; /* Smaller switch */
+}
+
+.dark-mode-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc; /* Default off state */
+    transition: .4s;
+    border-radius: 20px; /* Matches height */
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px; /* Smaller handle */
+    width: 16px;  /* Smaller handle */
+    left: 2px;   /* Adjust position */
+    bottom: 2px;  /* Adjust position */
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--primary-color); /* Use theme color for on state */
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px var(--primary-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px); /* Move handle across */
+}
+
+/* Dark Mode Toggle Adjustments */
+body.dark-mode .dark-mode-label {
+    color: var(--text-color); /* Use dark mode text color */
+}
+
+body.dark-mode input:checked + .slider {
+    background-color: #4a4a4a; 
 }

@@ -17,11 +17,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentTaskTextarea = document.getElementById('current-task-textarea');
     const importProfileBtn = document.getElementById('import-profile-btn');
     const exportProfileBtn = document.getElementById('export-profile-btn');
+    const darkModeToggle = document.getElementById('dark-mode-checkbox');
 
     // --- Initialization ---
 
     function initializeApp() {
         loadData();
+        applyDarkModeSetting(); // Apply initial theme
         setupEventListeners();
         renderUI();
         // DragDrop will be initialized in renderRecords
@@ -114,9 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderRecords() {
         const recordsTbody = document.getElementById('records-tbody');
-        const currentProfileNameEl = document.getElementById('current-profile-name');
         
-        currentProfileNameEl.textContent = activeProfileName;
         recordsTbody.innerHTML = '';
 
         // Check if there are no records
@@ -203,6 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentTaskTextarea.addEventListener('input', Utils.debounce(handleCurrentTaskChange, 500));
         importProfileBtn.addEventListener('click', ImportExport.handleImportProfile);
         exportProfileBtn.addEventListener('click', ImportExport.handleExportProfile);
+        darkModeToggle.addEventListener('change', handleDarkModeToggle);
     }
 
     // --- Event Handlers ---
@@ -219,6 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentXmlRootTag = currentProfile?.xmlRootTag || 'prompt';
             if (xmlRootTagInput) xmlRootTagInput.value = currentXmlRootTag;
         }
+        exportProfileBtn.addEventListener('click', ImportExport.handleExportProfile);
     }
 
     function handleNewProfile() {
@@ -524,6 +526,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
   
+    // --- Theme Handling ---
+    function applyDarkModeSetting() {
+        const isDarkMode = Storage.loadDarkModeSetting();
+        document.body.classList.toggle('dark-mode', isDarkMode);
+        if (darkModeToggle) {
+            darkModeToggle.checked = isDarkMode;
+        }
+    }
+
+    function handleDarkModeToggle() {
+        const isEnabled = darkModeToggle.checked;
+        Storage.saveDarkModeSetting(isEnabled);
+        document.body.classList.toggle('dark-mode', isEnabled);
+    }
+
     // --- Start the application ---
     initializeApp();
 });

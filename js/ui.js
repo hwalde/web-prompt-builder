@@ -1,6 +1,5 @@
 const UI = (() => {
     const profileSelect = document.getElementById('profile-select');
-    const currentProfileNameSpan = document.getElementById('current-profile-name');
     const recordsTbody = document.getElementById('records-tbody');
     const xmlRootTagInput = document.getElementById('xml-root-tag');
 
@@ -33,14 +32,6 @@ const UI = (() => {
                 profileSelect.appendChild(option);
             });
         }
-         // Update displayed profile name
-        updateCurrentProfileName(activeProfileName);
-    }
-
-     function updateCurrentProfileName(profileName) {
-        if (currentProfileNameSpan) {
-             currentProfileNameSpan.textContent = profileName || 'No profile selected';
-        }
     }
 
     function renderRecordsTable(records) {
@@ -48,16 +39,15 @@ const UI = (() => {
         // Keep this function as a no-op for backwards compatibility
     }
 
-     function updateXmlRootTagInput(tagName) {
-         if (xmlRootTagInput) {
-             xmlRootTagInput.value = tagName || 'prompt';
-         }
-     }
+    function updateXmlRootTagInput(tagName) {
+        if (xmlRootTagInput) {
+            xmlRootTagInput.value = tagName || 'prompt';
+        }
+    }
 
     return {
         init,
         populateProfileSelect,
-        updateCurrentProfileName,
         renderRecordsTable,
         updateXmlRootTagInput
     };

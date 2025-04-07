@@ -1,6 +1,7 @@
 const PROFILES_KEY = 'promptBuilderProfiles';
 const ACTIVE_PROFILE_KEY = 'promptBuilderActiveProfile';
 const CURRENT_TASK_KEY_PREFIX = 'promptBuilderCurrentTask_'; // Prefix for profile-specific task
+const DARK_MODE_KEY = 'promptBuilderDarkMode'; // Key for dark mode setting
 
 const Storage = {
     /**
@@ -188,6 +189,33 @@ const Storage = {
             localStorage.removeItem(CURRENT_TASK_KEY_PREFIX + profileName);
         } catch (e) {
             console.error("Error deleting current task from LocalStorage:", e);
+        }
+    },
+
+    /**
+     * Loads the dark mode setting from LocalStorage.
+     * @returns {boolean} True if dark mode is enabled, false otherwise.
+     */
+    loadDarkModeSetting: () => {
+        try {
+            const darkModeValue = localStorage.getItem(DARK_MODE_KEY);
+            // Returns true if the value is 'true', otherwise false
+            return darkModeValue === 'true';
+        } catch (e) {
+            console.error("Error loading dark mode setting from LocalStorage:", e);
+            return false; // Default to false in case of error
+        }
+    },
+
+    /**
+     * Saves the dark mode setting to LocalStorage.
+     * @param {boolean} isEnabled True to enable dark mode, false to disable.
+     */
+    saveDarkModeSetting: (isEnabled) => {
+        try {
+            localStorage.setItem(DARK_MODE_KEY, isEnabled ? 'true' : 'false');
+        } catch (e) {
+            console.error("Error saving dark mode setting to LocalStorage:", e);
         }
     }
 };

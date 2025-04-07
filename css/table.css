@@ -21,12 +21,29 @@
     z-index: 10;
 }
 
+/* Dark mode table header */
+body.dark-mode #records-table thead th {
+    background-color: var(--light-color); /* Uses dark mode variable */
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
 #records-table tbody tr {
     transition: background-color 0.15s ease;
 }
 
 #records-table tbody tr:hover {
-    background-color: rgba(0, 123, 255, 0.05);
+    background-color: rgba(0, 123, 255, 0.05); /* Light blue hover */
+}
+
+/* Dark mode table row hover */
+body.dark-mode #records-table tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.15); /* Slightly more opaque blue */
+}
+
+/* Dark mode for empty row message */
+body.dark-mode #records-tbody tr td[colspan="4"] {
+    color: var(--text-muted);
 }
 
 #records-table .col-select { width: 80px; text-align: center; }
@@ -95,11 +112,12 @@
     pointer-events: none; /* Ensures the SVG doesn't interfere with drag events */
 }
 
-/* Prevent dragging on interactive elements */
-#records-table button,
-#records-table input {
-    cursor: pointer;
-    touch-action: auto;
+/* Dark mode drag handle */
+body.dark-mode .drag-handle {
+    color: var(--secondary-color); /* Uses dark mode variable */
+}
+body.dark-mode .drag-handle:hover {
+    color: var(--primary-color); /* Uses dark mode variable */
 }
 
 /* Update cursor for handle while dragging */
@@ -112,4 +130,11 @@
 body.is-dragging,
 body.is-dragging * {
     cursor: grabbing !important; /* Force grabbing cursor everywhere */
+}
+
+/* Dark mode dragging row styles */
+body.dark-mode #records-tbody tr.dragging,
+body.dark-mode #records-tbody tr.dragging td {
+    background-color: var(--warning-color); /* Uses dark mode variable */
+    color: var(--white-color); /* Use dark mode text on warning */
 }

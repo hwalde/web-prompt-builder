@@ -14,6 +14,13 @@
 <body>
     <header>
         <h1>Web Prompt Builder</h1>
+        <div id="dark-mode-toggle-container">
+            <label for="dark-mode-checkbox" class="dark-mode-label">Dark Mode</label>
+            <label class="dark-mode-switch">
+                <input type="checkbox" id="dark-mode-checkbox">
+                <span class="slider"></span>
+            </label>
+        </div>
     </header>
 
     <main>
@@ -45,7 +52,6 @@
 
         <section id="records-section">
             <h2>Select data for prompt</h2>
-            <p>Current Profile: <strong id="current-profile-name"></strong></p>
             <button id="add-record-btn" class="btn btn-primary">Add data</button>
             <table id="records-table">
                 <thead>

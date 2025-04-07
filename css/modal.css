@@ -76,6 +76,9 @@
     flex-grow: 1; /* Textarea fills available space in the div */
     margin-bottom: 0; /* No bottom margin as it's the last part of the form */
     min-height: 200px; /* Minimum height */
+    background-color: var(--white-color); /* Ensure textarea background matches */
+    color: var(--text-color); /* Ensure textarea text matches */
+    border: 1px solid var(--border-color); /* Ensure textarea border matches */
 }
 
 .modal-actions {
@@ -102,4 +105,12 @@
 }
 .modal-close-x:hover {
     color: var(--dark-color);
+}
+
+/* Dark mode modal adjustments */
+body.dark-mode .modal-close-x {
+    color: var(--secondary-color);
+}
+body.dark-mode .modal-close-x:hover {
+    color: var(--text-color); /* Use light text color for hover */
 }
