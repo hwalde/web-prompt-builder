@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,59 +13,60 @@
 </head>
 <body>
     <header>
-        <h1>Prompt Builder</h1>
+        <h1>Web Prompt Builder</h1>
     </header>
 
     <main>
         <section id="profile-section">
             <h2>Profile Management</h2>
             <div class="profile-controls">
-                <label for="profile-select">Aktives Profil:</label>
+                <label for="profile-select">Active profile:</label>
                 <select id="profile-select"></select>
-                <button id="new-profile-btn" class="btn btn-secondary">Neues Profil</button>
-                <button id="rename-profile-btn" class="btn btn-secondary">Profil umbenennen</button>
-                <button id="delete-profile-btn" class="btn btn-danger">Profil löschen</button>
+                <button id="new-profile-btn" class="btn btn-secondary">New profile</button>
+                <button id="rename-profile-btn" class="btn btn-secondary">Rename profile</button>
+                <button id="delete-profile-btn" class="btn btn-danger">Delete profile</button>
             </div>
         </section>
 
         <section id="records-section">
-            <h2>Daten für Profil: <span id="current-profile-name"></span></h2>
-            <button id="add-record-btn" class="btn btn-primary">Neuen Datensatz hinzufügen</button>
+            <h2>Select data for prompt</h2>
+            <p>Current Profile: <strong id="current-profile-name"></strong></p>
+            <button id="add-record-btn" class="btn btn-primary">Add data</button>
             <table id="records-table">
                 <thead>
                     <tr>
                         <th class="col-drag"></th>
-                        <th class="col-select">Auswählen</th>
+                        <th class="col-select">Select</th>
                         <th class="col-name">Name</th>
-                        <th class="col-actions">Aktionen</th>
+                        <th class="col-actions">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="records-tbody">
                     </tbody>
             </table>
-             <p class="drag-hint">💡 Datensätze können per Drag & Drop umsortiert werden.</p>
+             <p class="drag-hint">💡 Data can be reordered using Drag & Drop.</p>
         </section>
 
         <section id="current-task-section">
             <h2>Current Task (User Prompt)</h2>
             <div class="form-group form-group-textarea">
-                <label for="current-task-textarea">Beschreiben Sie hier die aktuelle Aufgabe:</label>
-                <textarea id="current-task-textarea" placeholder="z.B. Erstelle eine Zusammenfassung der folgenden Punkte..."></textarea>
+                <label for="current-task-textarea">Describe the current task here:</label>
+                <textarea id="current-task-textarea" placeholder="e.g., Create a summary of the following points..."></textarea>
             </div>
         </section>
 
         <section id="generation-section">
-            <h2>Prompt Generierung</h2>
+            <h2>Prompt Generation</h2>
             <div class="generation-controls">
                 <button id="generate-traditional-btn" class="btn btn-success btn-generate">
                     <span class="btn-icon"></span>
-                    Generiere Traditional Prompt
+                    Generate Traditional Prompt
                 </button>
                 <div class="divider-vertical"></div>
                 <div class="xml-generation">
                     <button id="generate-xml-btn" class="btn btn-success btn-generate">
                         <span class="btn-icon"></span>
-                        Generiere XML Prompt
+                        Generate XML Prompt
                     </button>
                     <div class="xml-root-tag-container">
                         <label class="xml-root-tag-label">Root Tag Name:</label> 
@@ -79,12 +80,12 @@
     </main>
 
     <footer>
-        <p>Prompt Builder - Daten werden lokal im Browser gespeichert.</p>
+        <p>Web Prompt Builder - Data is saved locally in your browser.</p>
     </footer>
 
     <div id="modal-overlay" class="modal-overlay hidden"></div>
     <div id="modal-container" class="modal-container hidden">
-         <button id="modal-close-x" class="modal-close-x" aria-label="Schließen">&times;</button>
+         <button id="modal-close-x" class="modal-close-x" aria-label="Close">&times;</button>
         <div id="modal-content" class="modal-content">
             <input type="hidden" id="modal-record-id">
             <div class="form-group">
@@ -93,14 +94,14 @@
             </div>
             <div class="form-group form-group-checkbox">
                 <input type="checkbox" id="modal-escape">
-                <label for="modal-escape">Escape with `-Chars</label>
+                <label for="modal-escape">Escape with \` characters</label>
             </div>
             <div class="form-group form-group-textarea">
-                <label for="modal-content-area">Inhalt:</label>
+                <label for="modal-content-area">Content:</label>
                 <textarea id="modal-content-area"></textarea>
             </div>
             <div class="modal-actions">
-                <button id="modal-close-btn" class="btn btn-primary">Schließen & Speichern</button>
+                <button id="modal-close-btn" class="btn btn-primary">Close & Save</button>
             </div>
         </div>
     </div>

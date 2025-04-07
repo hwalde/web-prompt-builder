@@ -11,11 +11,11 @@
 .btn-generate.success .btn-icon::after {
     content: '';
     position: absolute;
-    background-color: currentColor; /* Nimmt Button-Textfarbe */
+    background-color: currentColor; /* Takes button text color */
     border-radius: 2px;
 }
 
-/* Langer Strich des Häkchens */
+/* Long part of the checkmark */
 .btn-generate.success .btn-icon::before {
     width: 0.7em;
     height: 0.18em;
@@ -26,7 +26,7 @@
     animation: checkmark-long 0.3s ease-out forwards;
 }
 
-/* Kurzer Strich des Häkchens */
+/* Short part of the checkmark */
 .btn-generate.success .btn-icon::after {
     width: 0.3em;
     height: 0.18em;
@@ -34,7 +34,7 @@
     left: 0.2em;
     transform: rotate(-45deg);
     transform-origin: left bottom;
-    animation: checkmark-short 0.3s 0.1s ease-out forwards; /* Mit kleiner Verzögerung */
+    animation: checkmark-short 0.3s 0.1s ease-out forwards; /* With a slight delay */
 }
 
 @keyframes checkmark-long {

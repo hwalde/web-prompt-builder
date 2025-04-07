@@ -10,9 +10,9 @@ const Modal = (() => {
     const recordIdInput = document.getElementById('modal-record-id');
 
     let currentRecordId = null;
-    let onSaveCallback = null; // Callback, der nach dem Speichern aufgerufen wird
+    let onSaveCallback = null; // Callback called after saving
 
-    // Debounced Speichern-Funktion
+    // Debounced save function
     const debouncedSave = Utils.debounce(saveData, 200);
 
     function open(record, saveCallback) {
@@ -42,7 +42,7 @@ const Modal = (() => {
         // Autosave listeners
         nameInput.addEventListener('input', debouncedSave);
         contentTextarea.addEventListener('input', debouncedSave);
-        escapeCheckbox.addEventListener('change', saveData); // Sofort speichern bei Checkbox
+        escapeCheckbox.addEventListener('change', saveData); // Save immediately on checkbox change
     }
 
     function close() {
@@ -79,7 +79,7 @@ const Modal = (() => {
             name: nameInput.value.trim(),
             escape: escapeCheckbox.checked,
             content: contentTextarea.value
-            // 'selected' status wird hier nicht geändert, nur im Haupt-UI
+            // 'selected' status is not changed here, only in the main UI
         };
 
         // Use the callback provided by main.js to update the central data store
@@ -106,5 +106,5 @@ const Modal = (() => {
     };
 })();
 
-// Global verfügbar machen
+// Make globally available
 window.Modal = Modal;

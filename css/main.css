@@ -5,7 +5,7 @@
 }
 
 html {
-    font-size: 16px; /* Basis für rem Einheiten */
+    font-size: 16px; /* Base for rem units */
 }
 
 body {
@@ -112,13 +112,13 @@ button:active, .btn:active {
 .btn-secondary { background-color: var(--secondary-color); color: var(--white-color); }
 .btn-success { background-color: var(--success-color); color: var(--white-color); }
 .btn-danger { background-color: var(--danger-color); color: var(--white-color); }
-.btn-warning { background-color: var(--warning-color); color: var(--dark-color); } /* Besserer Kontrast für Gelb */
+.btn-warning { background-color: var(--warning-color); color: var(--dark-color); } /* Better contrast for yellow */
 
 .btn-icon {
     display: inline-block;
-    width: 1em; /* Breite für Icon Platzhalter */
-    height: 1em; /* Höhe für Icon Platzhalter */
-    /* Style für das eigentliche Icon (z.B. Checkmark) kommt in animations.css */
+    width: 1em; /* Width for icon placeholder */
+    height: 1em; /* Height for icon placeholder */
+    /* Style for the actual icon (e.g., checkmark) comes in animations.css */
 }
 
 .profile-controls,
@@ -142,13 +142,13 @@ button:active, .btn:active {
 }
 
 .profile-controls label {
-    margin-bottom: 0; /* Kein Abstand unter dem Label in dieser Zeile */
+    margin-bottom: 0; /* No space below label in this row */
     margin-right: 0.5em;
 }
 
 .profile-controls select {
-     flex-grow: 1; /* Select nimmt verfügbaren Platz */
-     margin-bottom: 0; /* Kein Abstand unter dem Select in dieser Zeile */
+     flex-grow: 1; /* Select takes available space */
+     margin-bottom: 0; /* No space below select in this row */
      min-width: 150px;
 }
 
@@ -160,7 +160,7 @@ button:active, .btn:active {
     flex: 1;
 }
 .xml-generation input[type="text"] {
-     margin-bottom: 0; /* Kein Abstand unter dem Input in dieser Zeile */
+     margin-bottom: 0; /* No space below input in this row */
      width: 100%;
 }
 
@@ -200,12 +200,12 @@ footer {
     font-size: 0.9em;
 }
 
-/* Hilfsklassen */
+/* Helper classes */
 .hidden {
     display: none !important;
 }
 
-/* Responsivität */
+/* Responsiveness */
 @media (max-width: 768px) {
     .profile-controls,
     .generation-controls,

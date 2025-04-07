@@ -19,7 +19,7 @@ const UI = (() => {
         if (profileNames.length === 0) {
             const option = document.createElement('option');
             option.value = '';
-            option.textContent = 'Keine Profile vorhanden';
+            option.textContent = 'No profiles available';
             option.disabled = true;
             profileSelect.appendChild(option);
         } else {
@@ -39,7 +39,7 @@ const UI = (() => {
 
      function updateCurrentProfileName(profileName) {
         if (currentProfileNameSpan) {
-             currentProfileNameSpan.textContent = profileName || 'Kein Profil ausgewählt';
+             currentProfileNameSpan.textContent = profileName || 'No profile selected';
         }
     }
 

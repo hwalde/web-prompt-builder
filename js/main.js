@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let profiles = {};
     let activeProfileName = null;
     let currentRecords = [];
-    let xmlRootTag = 'prompt';
 
     // DOM Elements
     const profileSelect = document.getElementById('profile-select');
@@ -34,7 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadData() {
         profiles = Storage.loadProfiles();
         activeProfileName = Storage.loadActiveProfileName();
-        xmlRootTag = Storage.loadXmlRootTag();
 
         // Ensure there is at least a default profile if none exist
         if (Object.keys(profiles).length === 0) {
@@ -54,6 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Load records and current task for the active profile
         loadCurrentRecords();
+        // Update XML root tag input based on the loaded active profile
+        const currentProfile = profiles[activeProfileName];
+        const currentXmlRootTag = currentProfile?.xmlRootTag || 'prompt';
+        if (xmlRootTagInput) xmlRootTagInput.value = currentXmlRootTag;
     }
 
     function loadCurrentRecords() {
@@ -74,15 +76,16 @@ document.addEventListener('DOMContentLoaded', () => {
          Storage.saveProfiles(profiles);
          // Save active profile name (might have changed)
          Storage.saveActiveProfileName(activeProfileName);
-          // Save XML root tag
-         Storage.saveXmlRootTag(xmlRootTag);
     }
 
     function renderUI() {
         UI.populateProfileSelect(profiles, activeProfileName);
         renderRecords();
         renderCurrentTask();
-        UI.updateXmlRootTagInput(xmlRootTag);
+        // Update XML root tag input based on the current active profile
+        const currentProfile = profiles[activeProfileName];
+        const currentXmlRootTag = currentProfile?.xmlRootTag || 'prompt';
+        UI.updateXmlRootTagInput(currentXmlRootTag);
     }
 
     function renderCurrentTask() {
@@ -104,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const row = document.createElement('tr');
             const cell = document.createElement('td');
             cell.colSpan = 4; // Updated to 4 columns (drag + select + name + actions)
-            cell.textContent = 'Keine Datensätze für dieses Profil vorhanden.';
+            cell.textContent = 'No records available for this profile.';
             cell.style.textAlign = 'center';
             cell.style.fontStyle = 'italic';
             cell.style.color = 'var(--text-muted)';
@@ -119,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             row.innerHTML = `
                 <td class="col-drag">
-                    <div class="drag-handle" title="Ziehen um zu verschieben">
+                    <div class="drag-handle" title="Drag to reorder">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                             <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
                         </svg>
@@ -131,8 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td class="col-name">${Utils.escapeHtml(record.name)}</td>
                 <td class="col-actions">
                     <div class="action-buttons">
-                        <button class="btn btn-primary edit-record-btn" data-id="${record.id}">Bearbeiten</button>
-                        <button class="btn btn-danger delete-record-btn" data-id="${record.id}">Löschen</button>
+                        <button class="btn btn-primary edit-record-btn" data-id="${record.id}">Edit</button>
+                        <button class="btn btn-danger delete-record-btn" data-id="${record.id}">Delete</button>
                     </div>
                 </td>
             `;
@@ -159,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         recordsTbody.querySelectorAll('.delete-record-btn').forEach(button => {
             button.addEventListener('click', (e) => {
-                if (handleRecordDelete && confirm(`Möchten Sie diesen Datensatz wirklich löschen?`)) {
+                if (handleRecordDelete && confirm(`Are you sure you want to delete this record?`)) {
                     handleRecordDelete(e.target.dataset.id);
                 }
             });
@@ -179,9 +182,8 @@ document.addEventListener('DOMContentLoaded', () => {
         addRecordBtn.addEventListener('click', handleAddRecord);
         generateTraditionalBtn.addEventListener('click', handleGenerateTraditional);
         generateXmlBtn.addEventListener('click', handleGenerateXml);
-        xmlRootTagInput.addEventListener('input', Utils.debounce(handleXmlRootTagChange, 300));
-         xmlRootTagInput.addEventListener('change', handleXmlRootTagChange); // Save on blur/enter too
-         currentTaskTextarea.addEventListener('input', Utils.debounce(handleCurrentTaskChange, 500));
+        xmlRootTagInput.addEventListener('change', handleXmlRootTagChange);
+        currentTaskTextarea.addEventListener('input', Utils.debounce(handleCurrentTaskChange, 500));
     }
 
     // --- Event Handlers ---
@@ -193,15 +195,19 @@ document.addEventListener('DOMContentLoaded', () => {
             Storage.saveActiveProfileName(activeProfileName); // Persist selection immediately
             loadCurrentRecords();
             renderUI(); // Re-render table and load current task for the new profile
+            // Explicitly update xml input value after profile change handled by renderUI
+            const currentProfile = profiles[activeProfileName];
+            const currentXmlRootTag = currentProfile?.xmlRootTag || 'prompt';
+            if (xmlRootTagInput) xmlRootTagInput.value = currentXmlRootTag;
         }
     }
 
     function handleNewProfile() {
-        const newName = prompt("Geben Sie einen Namen für das neue Profil ein:");
+        const newName = prompt("Enter a name for the new profile:");
         if (newName && newName.trim()) {
             const trimmedName = newName.trim();
             if (profiles[trimmedName]) {
-                alert(`Ein Profil mit dem Namen "${trimmedName}" existiert bereits.`);
+                alert(`A profile named "${trimmedName}" already exists.`);
             } else {
                if (Storage.addProfile(trimmedName)) {
                     profiles = Storage.loadProfiles(); // Reload profiles state
@@ -211,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     Storage.saveCurrentTask(activeProfileName, '');
                     renderUI(); // Update the dropdown, table, and task area
                } else {
-                    alert("Profil konnte nicht erstellt werden.");
+                    alert("Could not create profile.");
                }
             }
         }
@@ -219,14 +225,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleRenameProfile() {
          if (!activeProfileName) {
-             alert("Bitte wählen Sie zuerst ein Profil aus.");
+             alert("Please select a profile first.");
              return;
          }
-        const newName = prompt(`Neuen Namen für Profil "${activeProfileName}" eingeben:`, activeProfileName);
+        const newName = prompt(`Enter a new name for profile "${activeProfileName}":`, activeProfileName);
         if (newName && newName.trim() && newName.trim() !== activeProfileName) {
             const trimmedName = newName.trim();
              if (profiles[trimmedName]) {
-                 alert(`Ein Profil mit dem Namen "${trimmedName}" existiert bereits.`);
+                 alert(`A profile named "${trimmedName}" already exists.`);
              } else {
                  if (Storage.renameProfile(activeProfileName, trimmedName)) {
                      const oldName = activeProfileName;
@@ -235,9 +241,9 @@ document.addEventListener('DOMContentLoaded', () => {
                      // No need to reload records, they are associated with the renamed profile
                      saveData(); // Saves potentially updated active profile name
                      renderUI(); // Update dropdown selection, title, and task area
-                     alert(`Profil "${oldName}" wurde in "${trimmedName}" umbenannt.`);
+                     alert(`Profile "${oldName}" was renamed to "${trimmedName}".`);
                  } else {
-                     alert("Profil konnte nicht umbenannt werden.");
+                     alert("Could not rename profile.");
                  }
              }
         }
@@ -245,10 +251,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleDeleteProfile() {
         if (!activeProfileName) {
-            alert("Bitte wählen Sie zuerst ein Profil zum Löschen aus.");
+            alert("Please select a profile to delete first.");
             return;
         }
-        if (confirm(`Möchten Sie das Profil "${activeProfileName}" und alle zugehörigen Daten wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden!`)) {
+        if (confirm(`Are you sure you want to delete the profile "${activeProfileName}" and all its data? This action cannot be undone!`)) {
              const nameToDelete = activeProfileName;
             if (Storage.deleteProfile(nameToDelete)) {
                  profiles = Storage.loadProfiles(); // Reload profiles state
@@ -258,21 +264,21 @@ document.addEventListener('DOMContentLoaded', () => {
                  loadCurrentRecords();
                  saveData(); // Saves updated profiles and potentially new active name
                  renderUI(); // Update UI
-                 alert(`Profil "${nameToDelete}" wurde gelöscht.`);
+                 alert(`Profile "${nameToDelete}" was deleted.`);
             } else {
-                alert("Profil konnte nicht gelöscht werden.");
+                alert("Could not delete profile.");
             }
         }
     }
 
     function handleAddRecord() {
         if (!activeProfileName) {
-            alert("Bitte wählen Sie zuerst ein Profil aus, um einen Datensatz hinzuzufügen.");
+            alert("Please select a profile first to add a record.");
             return;
         }
         const newRecord = {
             id: Utils.generateUUID(),
-            name: `Neuer Datensatz ${currentRecords.length + 1}`,
+            name: `New Record ${currentRecords.length + 1}`,
             content: '',
             escape: false,
             selected: true // Default to selected
@@ -366,7 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const taskText = currentTaskTextarea.value.trim();
 
         if (selectedRecords.length === 0 && !taskText) {
-             alert("Bitte wählen Sie mindestens einen Datensatz zum Generieren aus oder geben Sie eine Aufgabe ein.");
+             alert("Please select at least one record or enter a task to generate.");
              return;
          }
 
@@ -386,7 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
              if (finalPrompt) {
                  finalPrompt += '\n\n';
              }
-             finalPrompt += `Your current task:\\n${taskText}`;
+             finalPrompt += `Your current task:\n${taskText}`;
         }
 
         copyToClipboard(finalPrompt, generateTraditionalBtn);
@@ -397,11 +403,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const taskText = currentTaskTextarea.value.trim();
 
          if (selectedRecords.length === 0 && !taskText) {
-             alert("Bitte wählen Sie mindestens einen Datensatz zum Generieren aus oder geben Sie eine Aufgabe ein.");
+             alert("Please select at least one record or enter a task to generate.");
              return;
          }
 
-        const rootTagName = Utils.escapeXmlName(xmlRootTag.trim() || 'prompt');
+        // Get root tag from the current profile
+        const currentProfile = profiles[activeProfileName];
+        const profileXmlRootTag = currentProfile?.xmlRootTag || 'prompt';
+        const rootTagName = Utils.escapeXmlName(profileXmlRootTag.trim() || 'prompt');
         let xmlString = `<${rootTagName}>\n`;
 
         selectedRecords.forEach(record => {
@@ -421,9 +430,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleXmlRootTagChange(e) {
-         xmlRootTag = e.target.value.trim();
-         // Save immediately or rely on the general saveData triggered elsewhere
-         Storage.saveXmlRootTag(xmlRootTag); // Save this specific value
+         const newRootTag = e.target.value.trim();
+         if (activeProfileName && profiles[activeProfileName]) {
+             // Update the value in the profile object
+             profiles[activeProfileName].xmlRootTag = newRootTag || 'prompt'; // Use default if empty
+             // Save the updated profiles object which now includes the profile-specific root tag
+             saveData();
+         }
     }
 
     function handleCurrentTaskChange(e) {
@@ -438,13 +451,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text)
                 .then(() => {
-                    Utils.showCopyFeedback("Prompt in die Zwischenablage kopiert!");
+                    Utils.showCopyFeedback("Prompt copied to clipboard!");
                     if (buttonElement) {
                         Utils.showCheckAnimation(buttonElement);
                     }
                 })
                 .catch(err => {
-                    console.error('Fehler beim Kopieren in die Zwischenablage: ', err);
+                    console.error('Error copying to clipboard: ', err);
                     fallbackCopyToClipboard(text, buttonElement);
                 });
         } else {
@@ -475,7 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.removeChild(textarea);
             
             if (successful) {
-                Utils.showCopyFeedback("Prompt in die Zwischenablage kopiert!");
+                Utils.showCopyFeedback("Prompt copied to clipboard!");
                 if (buttonElement) {
                     Utils.showCheckAnimation(buttonElement);
                 }
@@ -483,10 +496,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('Copy command was unsuccessful');
             }
         } catch (err) {
-            console.error('Fallback: Fehler beim Kopieren in die Zwischenablage: ', err);
-            Utils.showCopyFeedback("Fehler beim Kopieren!", 3000);
-            alert("Konnte nicht in die Zwischenablage kopieren. Prüfen Sie die Browser-Berechtigungen oder kopieren Sie manuell aus der Konsole (F12).");
-            console.log("--- Zu kopierender Text ---");
+            console.error('Fallback: Error copying to clipboard: ', err);
+            Utils.showCopyFeedback("Error copying!", 3000);
+            alert("Could not copy to clipboard. Please check browser permissions or copy manually from the console (F12).");
+            console.log("--- Text to copy ---");
             console.log(text);
             console.log("--------------------------");
         }

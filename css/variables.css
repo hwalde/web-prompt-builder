@@ -22,7 +22,7 @@
     --modal-padding: 10px;
 }
 
-body.dark-mode { /* Optional: Beispiel für Dark Mode */
+body.dark-mode { /* Optional: Example for Dark Mode */
     --primary-color: #0d6efd;
     --secondary-color: #adb5bd;
     --success-color: #198754;

@@ -1,7 +1,7 @@
 /**
- * Generiert eine einfache UUID v4.
- * Nicht kryptographisch sicher, aber ausreichend für eindeutige IDs hier.
- * @returns {string} Eine UUID.
+ * Generates a simple UUID v4.
+ * Not cryptographically secure, but sufficient for unique IDs here.
+ * @returns {string} A UUID.
  */
 function generateUUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -12,9 +12,9 @@ function generateUUID() {
 }
 
 /**
- * Escaped HTML-Inhalt (ersetzt spezielle Zeichen).
- * @param {string} content Der zu escapende Inhalt.
- * @returns {string} Der escapte Inhalt.
+ * Escapes HTML content (replaces special characters).
+ * @param {string} content The content to escape.
+ * @returns {string} The escaped content.
  */
 function escapeHtml(content) {
     if (content === null || content === undefined) return '';
@@ -27,37 +27,37 @@ function escapeHtml(content) {
 }
 
 /**
- * Escaped XML-Namen (vereinfacht). Entfernt ungültige Zeichen und stellt sicher,
- * dass der Name mit einem Buchstaben oder '_' beginnt.
- * Ersetzt Leerzeichen und andere ungültige Zeichen durch '_'.
- * @param {string} name Der zu escapende Name.
- * @returns {string} Ein gültiger XML-Tag-Name.
+ * Escapes XML names (simplified). Removes invalid characters and ensures
+ * the name starts with a letter or '_'.
+ * Replaces spaces and other invalid characters with '_'.
+ * @param {string} name The name to escape.
+ * @returns {string} A valid XML tag name.
  */
 function escapeXmlName(name) {
     if (!name || typeof name !== 'string') return 'tag'; // Fallback
     let escaped = name.trim().replace(/[^a-zA-Z0-9_.-]/g, '_');
-    // Muss mit Buchstaben oder _ beginnen (XML-Regel)
+    // Must start with letter or _ (XML rule)
     if (!/^[a-zA-Z_]/.test(escaped)) {
         escaped = '_' + escaped;
     }
-    // Ersetze mehrere aufeinanderfolgende __ mit einem _
+    // Replace multiple consecutive __ with a single _
     escaped = escaped.replace(/__+/g, '_');
-     // Entferne führende/trailing _ falls nicht der einzige Character
+     // Remove leading/trailing _ if not the only character
     if (escaped.length > 1) {
        escaped = escaped.replace(/^_+|_+$/g, '');
-       // Nochmals prüfen ob es jetzt leer ist oder mit Zahl beginnt
+       // Check again if it's now empty or starts with a number
        if (!escaped || !/^[a-zA-Z_]/.test(escaped)) {
            escaped = '_' + escaped;
        }
     }
-     if (!escaped) return 'tag'; // Fallback falls alles entfernt wurde
+     if (!escaped) return 'tag'; // Fallback if everything was removed
     return escaped;
 }
 
 /**
- * Escaped XML-Inhalt (ersetzt spezielle Zeichen).
- * @param {string} content Der zu escapende Inhalt.
- * @returns {string} Der escapte Inhalt.
+ * Escapes XML content (replaces special characters).
+ * @param {string} content The content to escape.
+ * @returns {string} The escaped content.
  */
 function escapeXmlContent(content) {
     if (content === null || content === undefined) return '';
@@ -74,10 +74,10 @@ function escapeXmlContent(content) {
 }
 
 /**
- * Debounce-Funktion: Verzögert die Ausführung einer Funktion.
- * @param {function} func Die auszuführende Funktion.
- * @param {number} delay Die Verzögerung in Millisekunden.
- * @returns {function} Die debounced Funktion.
+ * Debounce function: Delays the execution of a function.
+ * @param {function} func The function to execute.
+ * @param {number} delay The delay in milliseconds.
+ * @returns {function} The debounced function.
  */
 function debounce(func, delay) {
     let timeoutId;
@@ -90,11 +90,11 @@ function debounce(func, delay) {
 }
 
 /**
- * Zeigt eine Feedback-Nachricht für das Kopieren an.
- * @param {string} message Die anzuzeigende Nachricht.
- * @param {number} duration Dauer in Millisekunden.
+ * Shows a feedback message for copying.
+ * @param {string} message The message to display.
+ * @param {number} duration Duration in milliseconds.
  */
-function showCopyFeedback(message = "In Zwischenablage kopiert!", duration = 2000) {
+function showCopyFeedback(message = "Copied to clipboard!", duration = 2000) {
     const feedbackElement = document.getElementById('copy-feedback');
     if (!feedbackElement) return;
 
@@ -107,19 +107,19 @@ function showCopyFeedback(message = "In Zwischenablage kopiert!", duration = 200
 }
 
  /**
- * Zeigt die Check-Animation auf einem Button an.
- * @param {HTMLElement} buttonElement Der Button, auf dem die Animation gezeigt wird.
+ * Shows the check animation on a button.
+ * @param {HTMLElement} buttonElement The button to show the animation on.
  */
 function showCheckAnimation(buttonElement) {
     if (!buttonElement) return;
     buttonElement.classList.add('success');
-    // Animation entfernen, damit sie erneut ausgelöst werden kann
+    // Remove animation so it can be triggered again
     setTimeout(() => {
         buttonElement.classList.remove('success');
-    }, 1500); // Dauer der Animation + Puffer
+    }, 1500); // Duration of animation + buffer
 }
 
-// Machen wir die Funktionen global verfügbar (oder über Module exportieren, wenn gewünscht)
+// Make functions globally available (or export via modules if desired)
 window.Utils = {
     generateUUID,
     escapeHtml,

@@ -1,17 +1,26 @@
 const PROFILES_KEY = 'promptBuilderProfiles';
 const ACTIVE_PROFILE_KEY = 'promptBuilderActiveProfile';
-const XML_ROOT_TAG_KEY = 'promptBuilderXmlRootTag';
 const CURRENT_TASK_KEY_PREFIX = 'promptBuilderCurrentTask_'; // Prefix for profile-specific task
 
 const Storage = {
     /**
-     * Lädt alle Profile aus dem LocalStorage.
-     * @returns {object} Ein Objekt mit allen Profilen oder ein leeres Objekt.
+     * Loads all profiles from LocalStorage.
+     * Ensures that each profile has an 'xmlRootTag' property (migration).
+     * @returns {object} An object with all profiles or an empty object.
      */
     loadProfiles: () => {
         try {
             const profilesJson = localStorage.getItem(PROFILES_KEY);
-            return profilesJson ? JSON.parse(profilesJson) : {};
+            let loadedProfiles = profilesJson ? JSON.parse(profilesJson) : {};
+
+            // Migration: Ensure all profiles have xmlRootTag
+            Object.keys(loadedProfiles).forEach(profileName => {
+                if (!loadedProfiles[profileName].hasOwnProperty('xmlRootTag')) {
+                    loadedProfiles[profileName].xmlRootTag = 'prompt'; // Default value
+                }
+            });
+
+            return loadedProfiles;
         } catch (e) {
             console.error("Error loading profiles from LocalStorage:", e);
             return {};
@@ -19,29 +28,29 @@ const Storage = {
     },
 
     /**
-     * Speichert alle Profile im LocalStorage.
-     * @param {object} profiles Das Objekt mit allen Profilen.
+     * Saves all profiles to LocalStorage.
+     * @param {object} profiles The object containing all profiles.
      */
     saveProfiles: (profiles) => {
         try {
             localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
         } catch (e) {
             console.error("Error saving profiles to LocalStorage:", e);
-            // Hier könnte man Nutzerfeedback geben, z.B. bei Quota-Überschreitung
+            // User feedback could be provided here, e.g., if quota is exceeded
         }
     },
 
     /**
-     * Lädt den Namen des aktuell aktiven Profils.
-     * @returns {string|null} Der Name des aktiven Profils oder null.
+     * Loads the name of the currently active profile.
+     * @returns {string|null} The name of the active profile or null.
      */
     loadActiveProfileName: () => {
         return localStorage.getItem(ACTIVE_PROFILE_KEY);
     },
 
     /**
-     * Speichert den Namen des aktuell aktiven Profils.
-     * @param {string} profileName Der Name des aktiven Profils.
+     * Saves the name of the currently active profile.
+     * @param {string} profileName The name of the active profile.
      */
     saveActiveProfileName: (profileName) => {
         if (profileName) {
@@ -52,27 +61,9 @@ const Storage = {
     },
 
     /**
-     * Lädt den Root-Tag für XML.
-     * @returns {string} Der XML-Root-Tag (default: 'prompt').
-     */
-    loadXmlRootTag: () => {
-        return localStorage.getItem(XML_ROOT_TAG_KEY) || 'prompt';
-    },
-
-    /**
-     * Speichert den Root-Tag für XML.
-     * @param {string} tagName Der zu speichernde Tag-Name.
-     */
-    saveXmlRootTag: (tagName) => {
-        if (tagName && typeof tagName === 'string') {
-            localStorage.setItem(XML_ROOT_TAG_KEY, tagName.trim());
-        }
-    },
-
-    /**
-     * Gibt die Daten (Records) für ein bestimmtes Profil zurück.
-     * @param {string} profileName Der Name des Profils.
-     * @returns {Array} Ein Array von Record-Objekten oder ein leeres Array.
+     * Returns the data (records) for a specific profile.
+     * @param {string} profileName The name of the profile.
+     * @returns {Array} An array of record objects or an empty array.
      */
     getProfileData: (profileName) => {
         const profiles = Storage.loadProfiles();
@@ -80,9 +71,9 @@ const Storage = {
     },
 
     /**
-     * Speichert die Daten (Records) für ein bestimmtes Profil.
-     * @param {string} profileName Der Name des Profils.
-     * @param {Array} records Das Array von Record-Objekten.
+     * Saves the data (records) for a specific profile.
+     * @param {string} profileName The name of the profile.
+     * @param {Array} records The array of record objects.
      */
     saveProfileData: (profileName, records) => {
         const profiles = Storage.loadProfiles();
@@ -95,16 +86,16 @@ const Storage = {
     },
 
      /**
-      * Löscht ein Profil und seine Daten.
-      * @param {string} profileName Der Name des zu löschenden Profils.
-      * @returns {boolean} True bei Erfolg, False sonst.
+      * Deletes a profile and its data.
+      * @param {string} profileName The name of the profile to delete.
+      * @returns {boolean} True on success, False otherwise.
       */
     deleteProfile: (profileName) => {
          const profiles = Storage.loadProfiles();
          if (profiles[profileName]) {
              delete profiles[profileName];
              Storage.saveProfiles(profiles);
-             // Wenn das gelöschte Profil aktiv war, muss der aktive Status entfernt werden
+             // If the deleted profile was active, the active status must be removed
              if (Storage.loadActiveProfileName() === profileName) {
                  Storage.saveActiveProfileName(null);
              }
@@ -114,10 +105,10 @@ const Storage = {
     },
 
      /**
-      * Benennt ein Profil um.
-      * @param {string} oldName Der alte Name.
-      * @param {string} newName Der neue Name.
-      * @returns {boolean} True bei Erfolg, False sonst (z.B. wenn neuer Name existiert).
+      * Renames a profile.
+      * @param {string} oldName The old name.
+      * @param {string} newName The new name.
+      * @returns {boolean} True on success, False otherwise (e.g., if the new name exists).
       */
     renameProfile: (oldName, newName) => {
         if (!newName || typeof newName !== 'string' || !oldName || typeof oldName !== 'string' || oldName === newName) {
@@ -125,11 +116,11 @@ const Storage = {
         }
         const profiles = Storage.loadProfiles();
         newName = newName.trim();
-        if (profiles[oldName] && !profiles[newName]) { // Nur umbenennen, wenn alter Name existiert und neuer nicht
+        if (profiles[oldName] && !profiles[newName]) { // Only rename if old name exists and new one does not
             profiles[newName] = profiles[oldName];
             delete profiles[oldName];
             Storage.saveProfiles(profiles);
-            // Wenn das umbenannte Profil aktiv war, den aktiven Namen aktualisieren
+            // If the renamed profile was active, update the active name
             if (Storage.loadActiveProfileName() === oldName) {
                 Storage.saveActiveProfileName(newName);
             }
@@ -139,16 +130,19 @@ const Storage = {
     },
 
     /**
-     * Fügt ein neues, leeres Profil hinzu.
-     * @param {string} profileName Der Name des neuen Profils.
-     * @returns {boolean} True bei Erfolg, False wenn der Name schon existiert.
+     * Adds a new, empty profile.
+     * @param {string} profileName The name of the new profile.
+     * @returns {boolean} True on success, False if the name already exists.
      */
     addProfile: (profileName) => {
          if (!profileName || typeof profileName !== 'string') return false;
          const profiles = Storage.loadProfiles();
          profileName = profileName.trim();
          if (!profiles[profileName]) {
-             profiles[profileName] = { records: [] };
+             profiles[profileName] = {
+                 records: [],
+                 xmlRootTag: 'prompt' // Add default root tag for new profiles
+             };
              Storage.saveProfiles(profiles);
              return true;
          }
@@ -156,9 +150,9 @@ const Storage = {
     },
 
     /**
-     * Lädt den aktuellen Task-Text für ein bestimmtes Profil.
-     * @param {string} profileName Der Name des Profils.
-     * @returns {string} Der gespeicherte Task-Text oder ein leerer String.
+     * Loads the current task text for a specific profile.
+     * @param {string} profileName The name of the profile.
+     * @returns {string} The saved task text or an empty string.
      */
     loadCurrentTask: (profileName) => {
         if (!profileName) return '';
@@ -171,9 +165,9 @@ const Storage = {
     },
 
     /**
-     * Speichert den aktuellen Task-Text für ein bestimmtes Profil.
-     * @param {string} profileName Der Name des Profils.
-     * @param {string} taskText Der zu speichernde Text.
+     * Saves the current task text for a specific profile.
+     * @param {string} profileName The name of the profile.
+     * @param {string} taskText The text to save.
      */
     saveCurrentTask: (profileName, taskText) => {
         if (!profileName) return;
@@ -185,8 +179,8 @@ const Storage = {
     },
 
     /**
-     * Löscht den Task-Text für ein bestimmtes Profil (wird beim Löschen des Profils benötigt).
-     * @param {string} profileName Der Name des Profils.
+     * Deletes the task text for a specific profile (needed when deleting the profile).
+     * @param {string} profileName The name of the profile.
      */
     deleteCurrentTask: (profileName) => {
         if (!profileName) return;
@@ -198,5 +192,5 @@ const Storage = {
     }
 };
 
-// Global verfügbar machen
+// Make globally available
 window.Storage = Storage;
