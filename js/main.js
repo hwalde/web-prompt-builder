@@ -436,6 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Add ``` on separate lines, ensure no extra newlines if content is empty
                  content = content.trim() === '' ? '```\n```' : `\`\`\`\n${content}\n\`\`\``;
             } 
+            content = record.name + ':\n' + content;
             return content;
         });
 
