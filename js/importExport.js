@@ -123,6 +123,8 @@ const ImportExport = (() => {
                     });
                     // --- End Validation --- 
 
+                    // Reload profiles from storage right before the check to ensure freshness
+                    _profiles = _Storage.loadProfiles(); 
 
                     let proceedWithImport = true;
                     if (_profiles[importedProfileName]) {
