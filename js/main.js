@@ -255,11 +255,13 @@ document.addEventListener('DOMContentLoaded', () => {
              if (profiles[trimmedName]) {
                  alert(`A profile named "${trimmedName}" already exists.`);
              } else {
-                 if (Storage.renameProfile(activeProfileName, trimmedName)) {
-                     const oldName = activeProfileName;
+                 const oldName = activeProfileName;
+                 const currentTaskText = Storage.loadCurrentTask(oldName);
+                 if (Storage.renameProfile(oldName, trimmedName)) {
                      profiles = Storage.loadProfiles(); // Reload profiles state
                      activeProfileName = trimmedName; // Update active name
-                     // No need to reload records, they are associated with the renamed profile
+                     Storage.saveCurrentTask(activeProfileName, currentTaskText);
+                     Storage.deleteCurrentTask(oldName);
                      saveData(); // Saves potentially updated active profile name
                      renderUI(); // Update dropdown selection, title, and task area
                      alert(`Profile "${oldName}" was renamed to "${trimmedName}".`);
