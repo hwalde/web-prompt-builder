@@ -185,6 +185,32 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
         
+        recordsTbody.querySelectorAll('td.col-name').forEach(cell => {
+            const row = cell.closest('tr'); // Find the parent row
+            const recordId = row.dataset.id;
+            cell.addEventListener('dblclick', () => {
+                if (handleRecordEdit) {
+                    handleRecordEdit(recordId);
+                }
+            });
+        });
+        
+        // Add click listener to the select cell to toggle the checkbox
+        recordsTbody.querySelectorAll('td.col-select').forEach(cell => {
+            cell.addEventListener('click', (e) => {
+                // Prevent triggering the checkbox's own click event if the click is directly on the checkbox
+                if (e.target.tagName === 'INPUT') return;
+                
+                const checkbox = cell.querySelector('.record-checkbox');
+                if (checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                    // Manually trigger the change event to ensure handleRecordSelect is called
+                    const changeEvent = new Event('change', { bubbles: true });
+                    checkbox.dispatchEvent(changeEvent);
+                }
+            });
+        });
+        
         // Re-initialize DragDrop with the current tbody
         DragDrop.init(recordsTbody, handleRecordReordering);
     }
@@ -299,17 +325,17 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("Please select a profile first to add a record.");
             return;
         }
+        // Create a new record object without adding it to the list yet
         const newRecord = {
             id: Utils.generateUUID(),
-            name: `New Record ${currentRecords.length + 1}`,
+            name: '', // Start with an empty name
             content: '',
             escape: false,
             selected: true // Default to selected
         };
-        currentRecords.push(newRecord);
-        saveData();
-        renderUI();
-        // Optional: Scroll to the new record or open modal directly
+        // Open the modal for the new record
+        Modal.open(newRecord, handleModalSave); 
+        // Don't save or render here; wait for modal save
     }
 
     // Called by UI module when a record's checkbox changes
@@ -337,18 +363,23 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleModalSave(updatedData) {
          const recordIndex = currentRecords.findIndex(r => r.id === updatedData.id);
          if (recordIndex > -1) {
-             // Update only the fields edited in the modal, keep 'selected' status
+             // --- Existing Record: Update --- 
              currentRecords[recordIndex] = {
                  ...currentRecords[recordIndex], // Keep existing properties like 'selected'
                  name: updatedData.name,
                  content: updatedData.content,
                  escape: updatedData.escape
              };
-             saveData();
-             renderUI(); // Re-render table to show updated name
          } else {
-             console.error("Record to save not found:", updatedData.id);
+             // --- New Record: Add --- 
+             // Ensure 'selected' status is included when adding a new record
+             currentRecords.push({
+                 ...updatedData, // Includes id, name, content, escape from modal
+                 selected: true // Explicitly set selected status for new records
+             });
          }
+         saveData();
+         renderUI(); // Re-render table to show updated/new record
     }
 
     // Called by UI module when delete button is clicked (after confirmation)
